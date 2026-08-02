@@ -37,7 +37,53 @@ const buildStyles = () => `
   /* ── Layout ── */
   .fw-page{min-height:100vh;background:var(--bg);color:var(--text)}
   .fw-login-wrap{display:grid;grid-template-columns:42% 1fr;min-height:100vh}
-  .fw-login-brand{background:var(--brand-left);padding:36px 32px;display:flex;flex-direction:column;justify-content:space-between}
+  .fw-login-brand{
+    position:relative;overflow:hidden;color:white;padding:38px 34px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    background:
+      radial-gradient(circle at 12% 10%,rgba(255,171,0,0.18),transparent 28%),
+      linear-gradient(155deg,${FED_NAVY} 0%,#08245E 52%,#0D357F 100%);
+  }
+  .fw-login-brand::after{
+    content:"";position:absolute;right:-160px;bottom:-160px;width:360px;height:360px;
+    border-radius:999px;border:1px solid rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.03);pointer-events:none;
+  }
+  .fw-brand-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start}
+  .fw-theme-pill{
+    padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.08);color:white;font-size:12px;font-weight:700;
+    cursor:pointer;letter-spacing:0.02em;
+  }
+  .fw-brand-main{position:relative;z-index:1;max-width:420px;margin:0 auto;width:100%}
+  .fw-brand-label{
+    font-size:12px;font-weight:800;color:${FED_GOLD};text-transform:uppercase;
+    letter-spacing:0.13em;margin-bottom:18px;
+  }
+  .fw-brand-title{font-size:48px;font-weight:900;color:white;line-height:1.04;letter-spacing:-0.04em;margin-bottom:22px}
+  .fw-brand-title span{display:block;font-size:34px;letter-spacing:-0.03em;margin-top:8px}
+  .fw-brand-text{font-size:15px;color:rgba(255,255,255,0.78);line-height:1.75;max-width:380px}
+  .fw-brand-features{margin-top:32px;display:grid;gap:14px}
+  .fw-brand-feature{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.84);font-size:14px;line-height:1.5}
+  .fw-brand-feature::before{content:"";width:7px;height:7px;border-radius:999px;background:${FED_GOLD};flex:0 0 auto}
+  .fw-brand-footer{position:relative;z-index:1;display:grid;gap:16px}
+  .fw-brand-footer-card{
+    background:rgba(255,255,255,0.07);border:1px solid rgba(255,171,0,0.38);
+    border-radius:14px;padding:18px 20px;
+  }
+  .fw-brand-footer-title{
+    font-size:12px;color:${FED_GOLD};font-weight:800;text-transform:uppercase;
+    letter-spacing:0.06em;margin-bottom:8px;
+  }
+  .fw-brand-footer-meta{font-size:12px;color:rgba(255,255,255,0.72);line-height:1.6}
+  .fw-brand-copy{font-size:12px;color:rgba(255,255,255,0.42);text-align:center}
+  .fw-role-icon{
+    width:34px;height:34px;border-radius:10px;margin:0 auto 8px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,32,96,0.08);color:${FED_NAVY};font-weight:900;font-size:13px;
+    border:1px solid rgba(0,32,96,0.12);
+  }
+  [data-theme="dark"] .fw-role-icon{background:rgba(147,197,253,0.12);color:#93C5FD;border-color:rgba(147,197,253,0.18)}
   .fw-content{max-width:780px;margin:0 auto;padding:24px 16px}
   .fw-content-wide{max-width:1100px;margin:0 auto;padding:24px 16px}
   .fw-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -341,9 +387,9 @@ function PrintReport({saved}) {
               ))}
             </tbody>
           </table>
-          <div style={{marginTop:10,padding:"8px 10px",background:"#FFF8E0",border:"1px solid #E8A000",borderRadius:6,fontSize:11,color:"#7A5800"}}>
+          {/* temporary<div style={{marginTop:10,padding:"8px 10px",background:"#FFF8E0",border:"1px solid #E8A000",borderRadius:6,fontSize:11,color:"#7A5800"}}>
             ⚠ This patient's name is used on this report only and is not stored in the database (as per privacy agreement dated 25 March 2026).
-          </div>
+          </div>*/}
         </div>
       </div>
 
@@ -750,31 +796,41 @@ export default function App() {
     <div className="fw-page fw-login-wrap">
       {/* Left branding panel */}
       <div className="fw-login-brand">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div className="fw-brand-top">
           <FedUniLogo white height={42}/>
-          <button onClick={toggleTheme} style={{padding:"5px 9px",borderRadius:7,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.1)",color:"white",fontSize:14,cursor:"pointer"}}>
-            {isDark?"☀️":"🌙"}
+          <button onClick={toggleTheme} className="fw-theme-pill">
+            {isDark ? "Light" : "Dark"}
           </button>
         </div>
-        <div>
-          <div style={{fontSize:11,fontWeight:700,color:FED_GOLD,textTransform:"uppercase",letterSpacing:"0.12em",marginBottom:12}}>Nursing Gippsland · Community Health</div>
-          <div style={{fontSize:30,fontWeight:800,color:"white",lineHeight:1.15,marginBottom:14}}>FedWELL<br/>Health Check<br/>Platform</div>
-          <div style={{fontSize:13,color:"rgba(255,255,255,0.5)",lineHeight:1.75,marginBottom:22}}>Digital health check recording for pop-up community clinics across Gippsland.</div>
-          <div style={{fontSize:12,color:"rgba(255,255,255,0.45)",lineHeight:2.2}}>
-            🔒 No patient names stored<br/>
-            📮 Postcode-based demographic analysis<br/>
-            📊 Real-time out-of-range flagging<br/>
-            🔗 Australian health resource links<br/>
-            🖨 Colour-coded printable reports<br/>
-            📱 Mobile &amp; laptop ready
+
+        <div className="fw-brand-main">
+          <div className="fw-brand-label">Nursing Gippsland · Community Health</div>
+
+          <h1 className="fw-brand-title">
+            FedWELL
+            <span>Health Check Platform</span>
+          </h1>
+
+          <p className="fw-brand-text">
+            A secure platform for recording community health screening data and preparing
+            clear summary reports for staff review.
+          </p>
+
+          <div className="fw-brand-features">
+            <div className="fw-brand-feature">Structured health check workflow</div>
+            <div className="fw-brand-feature">Secure staff and student access</div>
+            <div className="fw-brand-feature">Printable screening summaries</div>
           </div>
         </div>
-        <div>
-          <div style={{background:"rgba(255,171,0,0.15)",border:"1px solid rgba(255,171,0,0.3)",borderRadius:8,padding:"10px 14px",marginBottom:16}}>
-            <div style={{fontSize:11,color:FED_GOLD,fontWeight:700,marginBottom:2}}>A FEDERATION UNIVERSITY INITIATIVE</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>CRICOS: 00103D · TEQSA: PRV12151 · RTO: 4909</div>
+
+        <div className="fw-brand-footer">
+          <div className="fw-brand-footer-card">
+            <div className="fw-brand-footer-title">Federation University Australia</div>
+            <div className="fw-brand-footer-meta">
+              CRICOS: 00103D · TEQSA: PRV12151 · RTO: 4909
+            </div>
           </div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.18)"}}>© 2026 FedWELL · federation.edu.au</div>
+          <div className="fw-brand-copy">© 2026 FedWELL · federation.edu.au</div>
         </div>
       </div>
 
@@ -789,12 +845,12 @@ export default function App() {
           <div style={{fontSize:14,color:"var(--muted)",marginBottom:24}}>Enter your FedWELL email and password.</div>
           <div style={{fontSize:11,fontWeight:700,color:"var(--muted)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:10}}>I am a…</div>
           <div className="fw-role-grid">
-            {[["staff","🏥","Student / Staff","Enter patient data"],["teacher","📊","Teachers / Admin","View analytics"]].map(([r,icon,label,desc])=>{
+            {[["staff","S","Student / Staff","Enter patient data"],["teacher","A","Teachers / Admin","View analytics"]].map(([r,mark,label,desc])=>{
               const sel=selRole===r;
               return(
                 <button key={r} onClick={()=>{setSelRole(r);setPw("");setLE("");}}
                   style={{padding:"14px 10px",borderRadius:12,textAlign:"center",border:`2px solid ${sel?FED_NAVY:isDark?"#334155":"#E2E8F0"}`,background:sel?(isDark?`rgba(0,32,96,0.4)`:`rgba(0,32,96,0.06)`):(isDark?"#243048":"#fff"),cursor:"pointer",minHeight:90}}>
-                  <div style={{fontSize:24,marginBottom:5}}>{icon}</div>
+                  <div className="fw-role-icon">{mark}</div>
                   <div style={{fontSize:13,fontWeight:700,color:sel?brandText:"var(--text)"}}>{label}</div>
                   <div style={{fontSize:11,color:"var(--muted)",marginTop:2}}>{desc}</div>
                 </button>
@@ -947,7 +1003,7 @@ export default function App() {
             </div>
           </SCard>
 
-          <PrivacyBanner dark={isDark}>Patient name &amp; home postcode stored separately. Name appears on report only — discarded after printing/emailing.</PrivacyBanner>
+          {/* temporary <PrivacyBanner dark={isDark}>Patient name &amp; home postcode stored separately. Name appears on report only — discarded after printing/emailing.</PrivacyBanner> */}
 
           <div style={{display:"flex",justifyContent:"flex-end",marginTop:18}}>
             <button onClick={proceed} style={{padding:"11px 24px",borderRadius:9,background:FED_NAVY,color:"white",border:"none",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 12px rgba(0,32,96,0.3)`}}>
@@ -1027,11 +1083,13 @@ export default function App() {
                   </div>
                 );
               })}
+              
               {flaggedFields.length>0&&(
                 <div style={{background:isDark?"#2D0A0A":"#FEF2F2",border:"1.5px solid #B91C1C",borderRadius:10,padding:"12px 14px",fontSize:13,color:"#B91C1C"}}>
-                  <strong>⚠ Out of range</strong> — Australian health links shown above. Links will also appear on the printed report.
+                  <strong>⚠ Out of range</strong> 
                 </div>
               )}
+              
             </div>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",gap:10}}>
