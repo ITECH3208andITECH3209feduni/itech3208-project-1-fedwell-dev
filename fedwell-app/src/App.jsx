@@ -504,6 +504,13 @@ const METRICS = [
         noFlag: true
       },
       {
+        k: "weight",
+        label: "Weight",
+        unit: "kg",
+        ph: "e.g. 70",
+        noFlag: true
+      },
+      {
         k: "waist",
         label: "Waist",
         unit: "cm",
@@ -823,6 +830,7 @@ function PrintReport({ saved }) {
     { label: "Oxygen Saturation", value: rec.oxysat, unit: "%", flag: flags.oxysat, fk: "oxysat" },
     { label: "Temperature", value: rec.temp, unit: "°C", flag: flags.temp, fk: "temp" },
     { label: "Height", value: rec.height, unit: "cm", flag: "ok" },
+    { label: "Weight", value: rec.weight, unit: "kg", flag: "ok" },
     { label: "Waist", value: rec.waist, unit: "cm", flag: flags.waist, fk: "waist" },
     { label: "BMI", value: rec.bmi, unit: "kg/m²", flag: flags.bmi, fk: "bmi" },
     { label: "Diabetes Risk Score", value: rec.diab, unit: "pts", flag: flags.diab, fk: "diab" },
@@ -1111,6 +1119,7 @@ export default function App() {
           temp: r.temp === null || r.temp === undefined ? null : parseFloat(r.temp),
           waist: r.waist === null || r.waist === undefined ? null : parseFloat(r.waist),
           height: r.height === null || r.height === undefined ? null : parseFloat(r.height),
+          weight: r.weight === null || r.weight === undefined ? null : parseFloat(r.weight),
           bmi: r.bmi === null || r.bmi === undefined ? null : parseFloat(r.bmi),
           diab: r.diab === null || r.diab === undefined ? null : parseFloat(r.diab),
           notes: r.notes || ""
@@ -1132,7 +1141,27 @@ export default function App() {
   const brandText = isDark ? "#93C5FD" : FED_NAVY;
   const brandSoftBg = isDark ? "rgba(147,197,253,0.14)" : "rgba(0,32,96,0.08)";
 
-  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const calculateBMI = (heightCm, weightKg) => {
+    const h = parseFloat(heightCm);
+    const w = parseFloat(weightKg);
+
+    if (!h || !w || h <= 0 || w <= 0) return "";
+
+    const heightM = h / 100;
+    return (w / (heightM * heightM)).toFixed(1);
+  };
+
+  const setF = (k, v) => {
+    setForm(f => {
+      const updated = { ...f, [k]: v };
+
+      if (k === "height" || k === "weight") {
+        updated.bmi = calculateBMI(updated.height, updated.weight);
+      }
+
+      return updated;
+    });
+  };
   const addLoc = loc => { if (!locations.includes(loc)) setLocs(ls => [...ls, loc]); };
   const resetForm = () => { setForm({ checkDate: new Date().toISOString().split("T")[0] }); setMS(0); setSaved(null); setGO(false); setSP(false); };
   const startNew = () => { resetForm(); setScreen("clientdetails"); };
@@ -1224,6 +1253,7 @@ export default function App() {
       temp: form.temp ? parseFloat(form.temp) : null,
       waist: form.waist ? parseFloat(form.waist) : null,
       height: form.height ? parseFloat(form.height) : null,
+      weight: form.weight ? parseFloat(form.weight) : null,
       bmi: form.bmi ? parseFloat(form.bmi) : null,
       diab: form.diab ? parseFloat(form.diab) : null,
       notes: form.notes || ""
@@ -1265,6 +1295,7 @@ export default function App() {
         temp: body.temp,
         waist: body.waist,
         height: body.height,
+        weight: body.weight,
         bmi: body.bmi,
         diab: body.diab,
         notes: body.notes
@@ -1790,7 +1821,9 @@ export default function App() {
       ["Blood Pressure", `${f.bpSys || "—"}/${f.bpDia || "—"}`, "mmHg", flags.bpSys === "ok" && flags.bpDia === "ok" ? "ok" : "high"],
       ["Pulse", f.pulse, "bpm", flags.pulse], ["Resp Rate", f.resp, "/min", flags.resp],
       ["Oxygen Sat", f.oxysat, "%", flags.oxysat], ["Temp", f.temp, "°C", flags.temp],
-      ["Height", f.height, "cm", "ok"], ["Waist", f.waist, "cm", flags.waist],
+      ["Height", f.height, "cm", "ok"],
+      ["Weight", f.weight, "kg", "ok"],
+      ["Waist", f.waist, "cm", flags.waist],
       ["BMI", f.bmi, "kg/m²", flags.bmi], ["Diabetes Risk", f.diab, "pts", flags.diab],
     ].filter(r => r[1] && r[1] !== "—/—");
     const fc = Object.values(flags).filter(v => v !== "ok").length;
@@ -1848,7 +1881,9 @@ export default function App() {
       ["Blood Pressure", `${rec.bpSys}/${rec.bpDia}`, "mmHg", flags.bpSys === "ok" && flags.bpDia === "ok" ? "ok" : "high"],
       ["Pulse", rec.pulse, "bpm", flags.pulse], ["Resp Rate", rec.resp, "/min", flags.resp],
       ["Oxygen Sat", rec.oxysat, "%", flags.oxysat], ["Temperature", rec.temp, "°C", flags.temp],
-      ["Waist", rec.waist, "cm", flags.waist], ["BMI", rec.bmi, "kg/m²", flags.bmi], ["Diabetes Risk", rec.diab, "pts", flags.diab],
+      ["Weight", rec.weight, "kg", "ok"],
+      ["Waist", rec.waist, "cm", flags.waist],
+      ["BMI", rec.bmi, "kg/m²", flags.bmi],
     ].filter(r => r[1] !== null && r[1] !== undefined && !isNaN(parseFloat(r[1])));
     return (
       <div className="fw-page">

@@ -37,6 +37,7 @@ router.post('/', verifyToken, async (req, res) => {
     temp,
     waist,
     height,
+    weight,
     bmi,
     diab,
     notes
@@ -69,6 +70,7 @@ router.post('/', verifyToken, async (req, res) => {
           temp,
           waist,
           height,
+          weight,
           bmi,
           diab,
           notes
@@ -99,6 +101,7 @@ router.post('/', verifyToken, async (req, res) => {
         temp,
         waist,
         height,
+        weight,
         bmi,
         diab,
         notes
