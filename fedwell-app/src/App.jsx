@@ -144,41 +144,418 @@ const buildStyles = () => `
 
 // ─── Clinical ranges ──────────────────────────────────────────────────────────
 const RANGES = {
-  bpSys: { lo: 90, hi: 120, u: "mmHg", l: "Systolic BP" },
-  bpDia: { lo: 60, hi: 80, u: "mmHg", l: "Diastolic BP" },
+  bpSys: { lo: 100, hi: 140, u: "mmHg", l: "Systolic BP" },
+  bpDia: { lo: 60, hi: 90, u: "mmHg", l: "Diastolic BP" },
   pulse: { lo: 60, hi: 100, u: "bpm", l: "Pulse" },
   resp: { lo: 12, hi: 20, u: "/min", l: "Resp Rate" },
   oxysat: { lo: 95, hi: 100, u: "%", l: "Oxygen Sat" },
-  temp: { lo: 36.1, hi: 37.2, u: "°C", l: "Temperature" },
-  waist: { lo: 0, hi: 88, u: "cm", l: "Waist" },
-  bmi: { lo: 18.5, hi: 24.9, u: "kg/m²", l: "BMI" },
-  diab: { lo: 0, hi: 11, u: "pts", l: "Diabetes Risk" },
+  temp: { lo: 36.0, hi: 37.5, u: "°C", l: "Temperature" },
+  waist: { lo: 0, hi: null, u: "cm", l: "Waist" },
+  bmi: { lo: 18.5, hi: null, u: "kg/m²", l: "BMI" },
+  diab: { lo: 0, hi: null, u: "pts", l: "Diabetes Risk" },
 };
 
 // ─── Australian health links ──────────────────────────────────────────────────
 const HEALTH_LINKS = {
-  bpSys: { high: [{ l: "Heart Foundation – High Blood Pressure", u: "https://www.heartfoundation.org.au/your-heart/know-your-risks/blood-pressure" }, { l: "Healthdirect – Hypertension", u: "https://www.healthdirect.gov.au/high-blood-pressure-hypertension" }], low: [{ l: "Healthdirect – Low Blood Pressure", u: "https://www.healthdirect.gov.au/low-blood-pressure" }] },
-  bpDia: { high: [{ l: "Heart Foundation – Blood Pressure", u: "https://www.heartfoundation.org.au/your-heart/know-your-risks/blood-pressure" }, { l: "Healthdirect – Hypertension", u: "https://www.healthdirect.gov.au/high-blood-pressure-hypertension" }], low: [{ l: "Healthdirect – Low Blood Pressure", u: "https://www.healthdirect.gov.au/low-blood-pressure" }] },
-  pulse: { high: [{ l: "Heart Foundation – Heart Health", u: "https://www.heartfoundation.org.au/" }, { l: "Healthdirect – Heart Rate", u: "https://www.healthdirect.gov.au/heart-rate" }], low: [{ l: "Healthdirect – Heart Rate", u: "https://www.healthdirect.gov.au/heart-rate" }] },
-  resp: { high: [{ l: "Lung Foundation Australia", u: "https://lungfoundation.com.au/" }, { l: "Healthdirect – Breathing Problems", u: "https://www.healthdirect.gov.au/breathing-problems" }], low: [{ l: "Lung Foundation Australia", u: "https://lungfoundation.com.au/" }] },
-  oxysat: { low: [{ l: "Lung Foundation Australia", u: "https://lungfoundation.com.au/" }, { l: "Healthdirect – Oxygen Saturation", u: "https://www.healthdirect.gov.au/oxygen-saturation" }] },
-  temp: { high: [{ l: "Healthdirect – Fever", u: "https://www.healthdirect.gov.au/fever" }], low: [{ l: "Healthdirect – Hypothermia", u: "https://www.healthdirect.gov.au/hypothermia" }] },
-  waist: { high: [{ l: "Obesity Australia", u: "https://www.obesity.org.au/" }, { l: "Eat for Health – Healthy Weight", u: "https://www.eatforhealth.gov.au/eating-well/achieving-and-maintaining-healthy-weight" }] },
-  bmi: { high: [{ l: "Eat for Health – Healthy Weight", u: "https://www.eatforhealth.gov.au/eating-well/achieving-and-maintaining-healthy-weight" }, { l: "Obesity Australia", u: "https://www.obesity.org.au/" }], low: [{ l: "Eat for Health – Underweight", u: "https://www.eatforhealth.gov.au/eating-well/achieving-and-maintaining-healthy-weight" }] },
-  diab: { high: [{ l: "Diabetes Australia", u: "https://www.diabetesaustralia.com.au/" }, { l: "NDSS – National Diabetes Services Scheme", u: "https://www.ndss.com.au/" }, { l: "Healthdirect – Diabetes", u: "https://www.healthdirect.gov.au/diabetes" }] },
+  bpSys: {
+    high: [
+      {
+        l: "Healthdirect – Hypertension",
+        u: "https://www.healthdirect.gov.au/high-blood-pressure-hypertension"
+      }
+    ],
+    low: []
+  },
+
+  bpDia: {
+    high: [
+      {
+        l: "Healthdirect – Hypertension",
+        u: "https://www.healthdirect.gov.au/high-blood-pressure-hypertension"
+      }
+    ],
+    low: []
+  },
+
+  pulse: {
+    high: [
+      {
+        l: "Heart Foundation – Heart Health",
+        u: "https://www.heartfoundation.org.au/"
+      }
+    ],
+    low: [
+      {
+        l: "Heart Foundation – Heart Health",
+        u: "https://www.heartfoundation.org.au/"
+      }
+    ]
+  },
+
+  resp: {
+    high: [
+      {
+        l: "Lung Foundation Australia",
+        u: "https://lungfoundation.com.au/"
+      },
+      {
+        l: "Healthdirect – Breathing Problems",
+        u: "https://www.healthdirect.gov.au/breathing-problems"
+      }
+    ],
+    low: [
+      {
+        l: "Lung Foundation Australia",
+        u: "https://lungfoundation.com.au/"
+      }
+    ]
+  },
+
+  oxysat: {
+    low: [
+      {
+        l: "Lung Foundation Australia",
+        u: "https://lungfoundation.com.au/"
+      }
+    ]
+  },
+
+  temp: {
+    high: [
+      {
+        l: "Healthdirect – Fever",
+        u: "https://www.healthdirect.gov.au/fever"
+      }
+    ],
+    low: [
+      {
+        l: "Healthdirect – Hypothermia",
+        u: "https://www.healthdirect.gov.au/hypothermia"
+      }
+    ]
+  },
+
+  waist: {
+    risk: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ],
+    high: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ]
+  },
+
+  bmi: {
+    low: [
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      }
+    ],
+    risk: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ],
+    high: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ],
+    high2: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ],
+    high3: [
+      {
+        l: "Healthdirect – Obesity",
+        u: "https://www.healthdirect.gov.au/obesity"
+      },
+      {
+        l: "Eat for Health",
+        u: "https://www.eatforhealth.gov.au/"
+      },
+      {
+        l: "Australian Government – BMI and Waist Measurement",
+        u: "https://www.health.gov.au/topics/overweight-and-obesity/bmi-and-waist"
+      },
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ]
+  },
+
+  diab: {
+    risk: [
+      {
+        l: "Diabetes Australia",
+        u: "https://www.diabetesaustralia.com.au/"
+      },
+      {
+        l: "NDSS – National Diabetes Services Scheme",
+        u: "https://www.ndss.com.au/"
+      },
+      {
+        l: "Healthdirect – Diabetes",
+        u: "https://www.healthdirect.gov.au/diabetes"
+      }
+    ],
+    high: [
+      {
+        l: "Diabetes Australia",
+        u: "https://www.diabetesaustralia.com.au/"
+      },
+      {
+        l: "NDSS – National Diabetes Services Scheme",
+        u: "https://www.ndss.com.au/"
+      },
+      {
+        l: "Healthdirect – Diabetes",
+        u: "https://www.healthdirect.gov.au/diabetes"
+      }
+    ]
+  },
+
+  lifestyle: {
+    smoking: [
+      {
+        l: "Australian Government – How to Quit Smoking and Vaping",
+        u: "https://www.health.gov.au/topics/smoking-vaping-and-tobacco/how-to-quit"
+      }
+    ],
+    activity: [
+      {
+        l: "Australian Government – Physical Activity Guidelines",
+        u: "https://www.health.gov.au/topics/physical-activity/24-hour-movement-guidelines-for-all-australians"
+      }
+    ]
+  }
 };
 
 // ─── Metric screens ───────────────────────────────────────────────────────────
 const METRICS = [
-  { key: "bp", label: "Blood Pressure", icon: "🩸", color: "#B91C1C", fields: [{ k: "bpSys", label: "Systolic", unit: "mmHg", ph: "e.g. 120", hint: "Normal: 90–120" }, { k: "bpDia", label: "Diastolic", unit: "mmHg", ph: "e.g. 80", hint: "Normal: 60–80" }] },
-  { key: "pulse", label: "Pulse Rate", icon: "❤️", color: "#DC2626", fields: [{ k: "pulse", label: "Pulse", unit: "bpm", ph: "e.g. 75", hint: "Normal: 60–100 bpm" }] },
-  { key: "resp", label: "Respiratory Rate", icon: "🫁", color: "#0891B2", fields: [{ k: "resp", label: "Rate", unit: "/min", ph: "e.g. 16", hint: "Normal: 12–20 /min" }] },
-  { key: "oxy", label: "Oxygen Saturation", icon: "💧", color: "#0284C7", fields: [{ k: "oxysat", label: "SpO₂", unit: "%", ph: "e.g. 98", hint: "Normal: ≥95%" }] },
-  { key: "temp", label: "Body Temperature", icon: "🌡️", color: "#EA580C", fields: [{ k: "temp", label: "Temp", unit: "°C", ph: "e.g. 36.6", hint: "Normal: 36.1–37.2°C" }] },
-  { key: "body", label: "Body Measurements", icon: "📏", color: "#6D28D9", fields: [{ k: "height", label: "Height", unit: "cm", ph: "e.g. 170", noFlag: true }, { k: "waist", label: "Waist", unit: "cm", ph: "e.g. 80", hint: "Male <102 cm · Female <88 cm" }] },
-  { key: "bmi", label: "BMI", icon: "⚖️", color: "#7C3AED", fields: [{ k: "bmi", label: "BMI", unit: "kg/m²", ph: "e.g. 22.5", hint: "Normal: 18.5–24.9" }] },
-  { key: "diab", label: "Diabetes Risk Score", icon: "🩺", color: "#B45309", fields: [{ k: "diab", label: "Score", unit: "pts", ph: "e.g. 8", hint: "Low risk: 0–11 pts" }] },
-  { key: "other", label: "Other Observations", icon: "📝", color: "#3730A3", fields: [{ k: "notes", label: "Notes", textarea: true, ph: "Any other observations, interventions or referrals..." }] },
+  {
+    key: "bp",
+    label: "Blood Pressure",
+    icon: "BP",
+    color: "#B91C1C",
+    fields: [
+      {
+        k: "bpSys",
+        label: "Systolic",
+        unit: "mmHg",
+        ph: "e.g. 120",
+        hint: "Normal adult range: 100–140 mmHg"
+      },
+      {
+        k: "bpDia",
+        label: "Diastolic",
+        unit: "mmHg",
+        ph: "e.g. 80",
+        hint: "Normal adult range: 60–90 mmHg"
+      }
+    ]
+  },
+  {
+    key: "pulse",
+    label: "Pulse Rate",
+    icon: "PR",
+    color: "#DC2626",
+    fields: [
+      {
+        k: "pulse",
+        label: "Pulse",
+        unit: "bpm",
+        ph: "e.g. 75",
+        hint: "Normal adult range: 60–100 bpm"
+      }
+    ]
+  },
+  {
+    key: "resp",
+    label: "Respiratory Rate",
+    icon: "RR",
+    color: "#0891B2",
+    fields: [
+      {
+        k: "resp",
+        label: "Rate",
+        unit: "/min",
+        ph: "e.g. 16",
+        hint: "Normal adult range: 12–20 /min"
+      }
+    ]
+  },
+  {
+    key: "oxy",
+    label: "Oxygen Saturation",
+    icon: "O2",
+    color: "#0284C7",
+    fields: [
+      {
+        k: "oxysat",
+        label: "SpO₂",
+        unit: "%",
+        ph: "e.g. 98",
+        hint: "Normal adult range: 95% or greater"
+      }
+    ]
+  },
+  {
+    key: "temp",
+    label: "Body Temperature",
+    icon: "T",
+    color: "#EA580C",
+    fields: [
+      {
+        k: "temp",
+        label: "Temp",
+        unit: "°C",
+        ph: "e.g. 36.6",
+        hint: "Normal adult range: 36.0–37.5°C"
+      }
+    ]
+  },
+  {
+    key: "body",
+    label: "Body Measurements",
+    icon: "BM",
+    color: "#6D28D9",
+    fields: [
+      {
+        k: "height",
+        label: "Height",
+        unit: "cm",
+        ph: "e.g. 170",
+        noFlag: true
+      },
+      {
+        k: "waist",
+        label: "Waist",
+        unit: "cm",
+        ph: "e.g. 80",
+        hint: "Men: increased risk ≥94 cm, greatly increased ≥102 cm. Women: increased risk ≥80 cm, greatly increased ≥88 cm."
+      }
+    ]
+  },
+  {
+    key: "bmi",
+    label: "BMI",
+    icon: "BMI",
+    color: "#7C3AED",
+    fields: [
+      {
+        k: "bmi",
+        label: "BMI",
+        unit: "kg/m²",
+        ph: "e.g. 22.5",
+        hint: "Adults: <18.5 underweight, 18.5–24.9 healthy, 25–29.9 overweight, 30–34.9 obese class I, 35–39.9 obese class II, 40+ obese class III."
+      }
+    ]
+  },
+  {
+    key: "diab",
+    label: "Diabetes Risk Score",
+    icon: "DR",
+    color: "#B45309",
+    fields: [
+      {
+        k: "diab",
+        label: "Score",
+        unit: "pts",
+        ph: "e.g. 8",
+        hint: "AUSDRISK: 6–11 points increased risk. 12+ points high risk or possible undiagnosed type 2 diabetes."
+      }
+    ]
+  },
+  {
+    key: "other",
+    label: "Other Observations",
+    icon: "OBS",
+    color: "#3730A3",
+    fields: [
+      {
+        k: "notes",
+        label: "Notes",
+        textarea: true,
+        ph: "Any other observations, interventions or referrals..."
+      }
+    ]
+  }
 ];
 
 const DEFAULT_LOCS = ["Campus – Gippsland", "Farm World", "Men's Shed", "Other Community Event"];
@@ -194,10 +571,51 @@ const SEED = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getFlag(k, v, g = "") {
-  const r = RANGES[k]; if (!r || v === null || v === undefined || v === "") return "ok";
-  const n = parseFloat(v); if (isNaN(n)) return "ok";
-  if (k === "waist") return n > (g === "Male" ? 102 : 88) ? "high" : "ok";
-  if (k === "oxysat") return n < r.lo ? "low" : "ok";
+  const r = RANGES[k];
+  if (!r || v === null || v === undefined || v === "") return "ok";
+
+  const n = parseFloat(v);
+  if (isNaN(n)) return "ok";
+
+  // Waist risk based on gender
+  if (k === "waist") {
+    if (g === "Male") {
+      if (n >= 102) return "high";
+      if (n >= 94) return "risk";
+      return "ok";
+    }
+
+    if (g === "Female") {
+      if (n >= 88) return "high";
+      if (n >= 80) return "risk";
+      return "ok";
+    }
+
+    return "ok";
+  }
+
+  // Oxygen saturation
+  if (k === "oxysat") {
+    return n < 95 ? "low" : "ok";
+  }
+
+  // BMI categories
+  if (k === "bmi") {
+    if (n < 18.5) return "low";
+    if (n >= 40) return "high3";
+    if (n >= 35) return "high2";
+    if (n >= 30) return "high";
+    if (n >= 25) return "risk";
+    return "ok";
+  }
+
+  // AUSDRISK diabetes score
+  if (k === "diab") {
+    if (n >= 12) return "high";
+    if (n >= 6) return "risk";
+    return "ok";
+  }
+
   return n < r.lo ? "low" : n > r.hi ? "high" : "ok";
 }
 function hasFlag(rec) { return Object.keys(RANGES).some(k => getFlag(k, rec[k], rec.gender) !== "ok"); }
@@ -210,40 +628,114 @@ function ageGroup(age) { if (!age) return "Unknown"; const a = parseInt(age); re
 // ─── Federation University Australia Logo SVG ─────────────────────────────────
 // Faithful representation: gold slash-mark + wordmark in navy/white
 const FedUniLogo = ({ white = false, height = 40 }) => {
-  const textColor = white ? "#FFFFFF" : FED_NAVY;
-  const subColor = white ? "rgba(255,255,255,0.75)" : "#4A5568";
-  const w = height * 5.2;
+  const textColor = white ? "#FFFFFF" : "#001EFF";
+  const subColor = white ? "rgba(255,255,255,0.78)" : "#001EFF";
+
   return (
-    <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} xmlns="http://www.w3.org/2000/svg"
-      style={{ verticalAlign: "middle", flexShrink: 0 }}>
-      {/* Gold "F" mark — stylised angular flame */}
-      <g>
-        {/* Gold background block */}
-        <rect x="0" y="0" width={height * 0.9} height={height} rx="3" fill={FED_GOLD} />
-        {/* Bold white F */}
-        <text x={height * 0.16} y={height * 0.72} fontSize={height * 0.7} fontWeight="900"
-          fontFamily="Arial Black, Arial, sans-serif" fill="white" letterSpacing="-1">F</text>
-        {/* Slash accent on the right edge of block */}
-        <polygon points={`${height * 0.82},0 ${height * 0.9},0 ${height * 0.9},${height} ${height * 0.72},${height}`}
-          fill={FED_GOLD2} />
-      </g>
-      {/* "FEDERATION" bold */}
-      <text x={height * 1.05} y={height * 0.44} fontSize={height * 0.38} fontWeight="800"
-        fontFamily="Inter, Arial, sans-serif" fill={textColor} letterSpacing="0.5"
-        dominantBaseline="middle">FEDERATION</text>
-      {/* "UNIVERSITY AUSTRALIA" lighter */}
-      <text x={height * 1.05} y={height * 0.76} fontSize={height * 0.26} fontWeight="500"
-        fontFamily="Inter, Arial, sans-serif" fill={subColor} letterSpacing="0.3"
-        dominantBaseline="middle">UNIVERSITY AUSTRALIA</text>
-    </svg>
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: height * 0.18,
+      height,
+      flexShrink: 0
+    }}>
+      <div style={{
+        width: height * 0.78,
+        height: height * 0.78,
+        position: "relative",
+        flexShrink: 0
+      }}>
+        <div style={{
+          position: "absolute",
+          left: 0,
+          top: height * 0.04,
+          width: height * 0.34,
+          height: height * 0.26,
+          background: textColor,
+          transform: "skewY(-8deg)"
+        }} />
+
+        <div style={{
+          position: "absolute",
+          left: height * 0.39,
+          top: 0,
+          width: height * 0.34,
+          height: height * 0.26,
+          background: textColor,
+          transform: "skewY(-8deg)"
+        }} />
+
+        <div style={{
+          position: "absolute",
+          left: 0,
+          top: height * 0.36,
+          width: height * 0.34,
+          height: height * 0.26,
+          background: textColor,
+          transform: "skewY(-8deg)"
+        }} />
+
+        <div style={{
+          position: "absolute",
+          left: height * 0.39,
+          top: height * 0.32,
+          width: height * 0.34,
+          height: height * 0.26,
+          background: textColor,
+          transform: "skewY(-8deg)"
+        }} />
+      </div>
+
+      <div style={{ lineHeight: 1 }}>
+        <div style={{
+          color: textColor,
+          fontSize: height * 0.48,
+          fontWeight: 700,
+          letterSpacing: "-0.05em"
+        }}>
+          Federation
+        </div>
+
+        <div style={{
+          color: subColor,
+          fontSize: height * 0.39,
+          fontWeight: 400,
+          letterSpacing: "-0.04em",
+          marginTop: -2
+        }}>
+          University
+        </div>
+      </div>
+    </div>
   );
 };
 
 // ─── UI Atoms ─────────────────────────────────────────────────────────────────
 const Badge = ({ status }) => {
-  const m = { high: { bg: "#FEF2F2", c: "#B91C1C", t: "HIGH" }, low: { bg: "#FFFBEB", c: "#B45309", t: "LOW" }, ok: { bg: "#F0FDF4", c: "#15803D", t: "OK" } };
+  const m = {
+    high3: { bg: "#FEF2F2", c: "#7F1D1D", t: "OBESE III" },
+    high2: { bg: "#FEF2F2", c: "#991B1B", t: "OBESE II" },
+    high: { bg: "#FEF2F2", c: "#B91C1C", t: "HIGH" },
+    risk: { bg: "#FFF7ED", c: "#C2410C", t: "RISK" },
+    low: { bg: "#FFFBEB", c: "#B45309", t: "LOW" },
+    ok: { bg: "#F0FDF4", c: "#15803D", t: "OK" }
+  };
+
   const s = m[status] || m.ok;
-  return <span style={{ background: s.bg, color: s.c, fontWeight: 700, fontSize: 10, padding: "2px 8px", borderRadius: 999, whiteSpace: "nowrap" }}>{s.t}</span>;
+
+  return (
+    <span style={{
+      background: s.bg,
+      color: s.c,
+      fontWeight: 700,
+      fontSize: 10,
+      padding: "2px 8px",
+      borderRadius: 999,
+      whiteSpace: "nowrap"
+    }}>
+      {s.t}
+    </span>
+  );
 };
 
 const PrivacyBanner = ({ children, dark }) => (
@@ -381,7 +873,7 @@ function PrintReport({ saved }) {
               {[
                 ["Patient Name", patient.name, "Age", patient.age + " yrs"],
                 ["Gender", patient.gender, "Home Postcode", rec.postcode || "—"],
-                ["Seen GP (12 mo.)", patient.gp || "—", "Check Location", `${rec.loc} ${rec.clinicPostcode ? `(${rec.clinicPostcode})` : ""}`],
+                ["Seen GP (12 mo.)", patient.gp || "—", "Check Location", rec.loc || "—"],
                 ["Student Nurse", rec.sn || "—", "Supervisor / RN", rec.rn || "—"],
               ].map(([l1, v1, l2, v2], i) => (
                 <tr key={i} style={{ background: i % 2 ? "#F8FAFC" : "#fff" }}>
@@ -1147,15 +1639,23 @@ export default function App() {
           </SCard>
 
           <SCard gradient="linear-gradient(135deg,#0B7A65,#065f46)" icon="📍" label="Clinic Details">
-            <div className="fw-grid2" style={{ marginBottom: 14 }}>
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Event / Pop-up Location</label>
-                <LocationInput value={f.loc || ""} onChange={v => setF("loc", v)} locations={locations} onAddLocation={addLoc} />
-              </div>
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Event Postcode</label>
-                <input className="fw-input" value={f.clinicPostcode || ""} onChange={e => setF("clinicPostcode", e.target.value)} placeholder="e.g. 3818" maxLength={4} />
-              </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{
+                fontSize: 13,
+                fontWeight: 600,
+                display: "block",
+                marginBottom: 5,
+                color: "var(--text)"
+              }}>
+                Event / Pop-up Location
+              </label>
+
+              <input
+                className="fw-input"
+                value={f.loc || ""}
+                onChange={e => setF("loc", e.target.value)}
+                placeholder="Enter event or pop-up location"
+              />
             </div>
             <div className="fw-grid2" style={{ marginBottom: 14 }}>
               <div>
@@ -1307,7 +1807,7 @@ export default function App() {
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Patient Summary</div>
             <div style={{ background: "var(--surface2)", borderRadius: 8, padding: 14, marginBottom: 16 }}>
               <div className="fw-grid2" style={{ fontSize: 13, gap: 8 }}>
-                {[["Patient", f.name || "—"], ["Age", f.age || "—"], ["Gender", f.gender || "—"], ["GP Visit", f.seenGP || "—"], ["Home Postcode", f.postcode || "—"], ["Date", fmtDate(f.checkDate)], ["Event Location", `${f.loc || "—"} ${f.clinicPostcode ? `(${f.clinicPostcode})` : ""}`], ["Student", f.sn || "—"], ["Supervisor/RN", f.rn || "—"]].map(([l, v]) => (
+                {[["Patient", f.name || "—"], ["Age", f.age || "—"], ["Gender", f.gender || "—"], ["GP Visit", f.seenGP || "—"], ["Home Postcode", f.postcode || "—"], ["Date", fmtDate(f.checkDate)], ["Event Location", f.loc || "—"], ["Student", f.sn || "—"], ["Supervisor/RN", f.rn || "—"]].map(([l, v]) => (
                   <span key={l} style={{ color: "var(--text)" }}><strong style={{ color: "var(--muted)", fontWeight: 600 }}>{l}:</strong> {v}</span>
                 ))}
               </div>
