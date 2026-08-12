@@ -1062,9 +1062,7 @@ export default function App() {
     year: "All",
     postcode: "All",
     gender: "All",
-    gp: "All",
-    loc: "All",
-    clinicPostcode: "All"
+    gp: "All"
   });
   const [dashTab, setDashTab] = useState("overview");
   const [selRole, setSelRole] = useState("staff");
@@ -1964,15 +1962,7 @@ export default function App() {
       ...Array.from(new Set(records.map(r => r.postcode).filter(Boolean))).sort()
     ];
 
-    const allLocations = [
-      "All",
-      ...Array.from(new Set(records.map(r => r.loc).filter(Boolean))).sort()
-    ];
 
-    const allClinicPostcodes = [
-      "All",
-      ...Array.from(new Set(records.map(r => r.clinicPostcode).filter(Boolean))).sort()
-    ];
 
     const df = dashFilter;
 
@@ -1981,8 +1971,6 @@ export default function App() {
       if (df.postcode !== "All" && r.postcode !== df.postcode) return false;
       if (df.gender !== "All" && r.gender !== df.gender) return false;
       if (df.gp !== "All" && r.gp !== df.gp) return false;
-      if (df.loc !== "All" && r.loc !== df.loc) return false;
-      if (df.clinicPostcode !== "All" && r.clinicPostcode !== df.clinicPostcode) return false;
       return true;
     });
     const total = recs.length;
@@ -2032,8 +2020,6 @@ export default function App() {
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "flex-end" }}>
               {[
                 ["year", "Year", allYears],
-                ["loc", "Event Location", allLocations],
-                ["clinicPostcode", "Event Postcode", allClinicPostcodes],
                 ["postcode", "Patient Postcode", allPostcodes],
                 ["gender", "Gender", ["All", "Male", "Female", "Non-Binary", "Prefer not to say", "Other"]],
                 ["gp", "GP Visit?", ["All", "Yes", "No"]]
@@ -2079,9 +2065,7 @@ export default function App() {
                     year: "All",
                     postcode: "All",
                     gender: "All",
-                    gp: "All",
-                    loc: "All",
-                    clinicPostcode: "All"
+                    gp: "All"
                   })}
                   style={{
                     padding: "5px 12px",
@@ -2205,7 +2189,7 @@ export default function App() {
             <div className="fw-card" style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ padding: "16px 18px 10px" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>De-identified Session Records</div>
-                <PrivacyBanner dark={isDark}>No patient names stored. Session ID, age, postcode &amp; gender only — as agreed with clients 25 March 2026.</PrivacyBanner>
+                
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
