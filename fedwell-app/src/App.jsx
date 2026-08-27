@@ -845,15 +845,13 @@ function PrintReport({ saved }) {
       {/* ── Letterhead ── */}
       <div style={{ borderBottom: `3px solid ${FED_NAVY}`, paddingBottom: 16, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-            {/* Fed Uni wordmark in print */}
-            <div style={{ background: FED_GOLD, borderRadius: 3, padding: "6px 10px" }}>
-              <span style={{ fontSize: 22, fontWeight: 900, color: "white", fontFamily: "Arial Black,Arial" }}>F</span>
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: FED_NAVY, letterSpacing: "0.5px" }}>FEDERATION</div>
-              <div style={{ fontSize: 10, fontWeight: 500, color: "#4A5568", letterSpacing: "0.3px" }}>UNIVERSITY AUSTRALIA</div>
-            </div>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 8
+          }}>
+            <FedUniLogo white={false} height={42} />
           </div>
           <div style={{ fontSize: 12, color: "#555" }}>Nursing Gippsland — Community Health Program</div>
           <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>federation.edu.au/nursing</div>
@@ -1308,6 +1306,51 @@ export default function App() {
     }
   };
 
+  const sendEmailReport = async () => {
+    if (!saved) return;
+
+    if (!form.email) {
+      alert("Please enter the patient's email before sending the report.");
+      return;
+    }
+
+    try {
+      const reportElement = document.getElementById("email-print-report");
+
+      if (!reportElement) {
+        alert("Could not prepare the printable report.");
+        return;
+      }
+
+      const reportHtml = reportElement.innerHTML;
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          to: form.email,
+          patientName: saved.patient.name,
+          sessionId: saved.rec.id,
+          reportHtml
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send email.");
+      }
+
+      alert("Printed report emailed successfully.");
+    } catch (err) {
+      console.error("Email report error:", err);
+      alert("Could not send email report. Check backend terminal.");
+    }
+  };
+
   const logout = () => { setRole(null); setScreen("login"); setPw(""); setPwEmail(""); setToken(""); setRecords([]); };
 
   // ── Theme Toggle Button ─────────────────────────────────────────────────────
@@ -1624,6 +1667,29 @@ export default function App() {
               <input className="fw-input" value={f.name || ""} onChange={e => setF("name", e.target.value)} placeholder="e.g. Jane Smith" />
               <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Used on printed/emailed report only — not stored in database</div>
             </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{
+                fontSize: 13,
+                fontWeight: 600,
+                display: "block",
+                marginBottom: 5,
+                color: "var(--text)"
+              }}>
+                Patient Email
+              </label>
+
+              <input
+                className="fw-input"
+                type="email"
+                value={f.email || ""}
+                onChange={e => setF("email", e.target.value)}
+                placeholder="e.g. patient@example.com"
+              />
+
+              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>
+                Used only for sending the patient report.
+              </div>
+            </div>
             <div className="fw-grid2" style={{ marginBottom: 14 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Age <span style={{ color: "#B91C1C" }}>*</span></label>
@@ -1857,7 +1923,7 @@ export default function App() {
               ⚠ {fc} out-of-range reading{fc > 1 ? "s" : ""} — Australian health links will be included on the report.
             </div>}
             <div style={{ background: isDark ? "#1A1500" : "#FFFBEB", border: "1px solid #F59E0B", borderRadius: 8, padding: 12, marginTop: 10, fontSize: 12, color: isDark ? "#FCD34D" : "#92400E" }}>
-              🔒 Patient name appears on the printed/emailed report only — <strong>NOT</strong> stored in the database.
+              Patient name appears on the printed/emailed report only — <strong>NOT</strong> stored in the database.
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -1938,10 +2004,21 @@ export default function App() {
                   style={{ width: "100%", padding: 11, borderRadius: 9, background: FED_NAVY, color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", marginBottom: 10 }}>
                   🖨 Preview &amp; Print Report
                 </button>
-                <button onClick={() => alert("Email functionality available in the final backend build.")}
+                <button onClick={sendEmailReport}
                   style={{ width: "100%", padding: 11, borderRadius: 9, background: "#0B7A65", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
-                  ✉ Email Report to Patient
+                  Email Report to Patient
                 </button>
+                <div style={{
+                  position: "absolute",
+                  left: "-99999px",
+                  top: 0,
+                  width: 760,
+                  background: "#ffffff"
+                }}>
+                  <div id="email-print-report">
+                    <PrintReport saved={saved} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2189,7 +2266,7 @@ export default function App() {
             <div className="fw-card" style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ padding: "16px 18px 10px" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>De-identified Session Records</div>
-                
+
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
