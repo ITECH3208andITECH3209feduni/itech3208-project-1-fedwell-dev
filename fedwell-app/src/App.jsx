@@ -1,4 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  BarChart,
+  Bar as ReBar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FEDERATION UNIVERSITY AUSTRALIA — Official Brand Colours
@@ -44,6 +57,12 @@ const buildStyles = () => `
       radial-gradient(circle at 12% 10%,rgba(255,171,0,0.18),transparent 28%),
       linear-gradient(155deg,${FED_NAVY} 0%,#08245E 52%,#0D357F 100%);
   }
+  .fw-dashboard-charts{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:18px;
+}
   .fw-login-brand::after{
     content:"";position:absolute;right:-160px;bottom:-160px;width:360px;height:360px;
     border-radius:999px;border:1px solid rgba(255,255,255,0.08);
@@ -115,6 +134,7 @@ const buildStyles = () => `
     .fw-nav-title{display:none}
     .fw-content,.fw-content-wide{padding:16px 12px}
     .fw-role-grid{grid-template-columns:1fr 1fr}
+    .fw-dashboard-charts{grid-template-columns:1fr}
   }
   @media(max-width:900px){
     .fw-page > div > div > div{
@@ -1043,6 +1063,25 @@ const SCard = ({ gradient, icon, label, children }) => (
       <span style={{ fontWeight: 700, fontSize: 13, color: "white" }}>{label}</span>
     </div>
     <div style={{ background: "var(--surface)", padding: 18 }}>{children}</div>
+  </div>
+);
+
+const ChartCard = ({ title, children }) => (
+  <div className="fw-card" style={{ minHeight: 330 }}>
+    <div style={{
+      fontSize: 11,
+      fontWeight: 800,
+      color: "var(--muted)",
+      textTransform: "uppercase",
+      letterSpacing: "0.08em",
+      marginBottom: 16,
+      textAlign: "center"
+    }}>
+      {title}
+    </div>
+    <div style={{ width: "100%", height: 260 }}>
+      {children}
+    </div>
   </div>
 );
 
@@ -2067,6 +2106,44 @@ export default function App() {
     const avg = k => total ? (recs.reduce((s, r) => s + (parseFloat(r[k]) || 0), 0) / total).toFixed(1) : "—";
     const fc = k => recs.filter(r => getFlag(k, r[k], r.gender) !== "ok").length;
 
+    const riskChartData = [
+      { metric: "Systolic BP", count: fc("bpSys") },
+      { metric: "Diastolic BP", count: fc("bpDia") },
+      { metric: "BMI", count: fc("bmi") },
+      { metric: "Diabetes", count: fc("diab") },
+      { metric: "Waist", count: fc("waist") },
+      { metric: "Oxygen Sat", count: fc("oxysat") },
+      { metric: "Pulse", count: fc("pulse") },
+      { metric: "Resp Rate", count: fc("resp") }
+    ];
+
+    const postcodeChartData = Array.from(
+      new Set(recs.map(r => r.postcode).filter(Boolean))
+    ).sort().map(pc => {
+      const group = recs.filter(r => r.postcode === pc);
+      return {
+        postcode: pc,
+        sessions: group.length,
+        avgBMI: group.length
+          ? Number((group.reduce((s, r) => s + (parseFloat(r.bmi) || 0), 0) / group.length).toFixed(1))
+          : 0,
+        avgSysBP: group.length
+          ? Number((group.reduce((s, r) => s + (parseFloat(r.bpSys) || 0), 0) / group.length).toFixed(1))
+          : 0,
+        flagged: group.filter(r => hasFlag(r)).length
+      };
+    });
+
+    const ageChartData = AGE_GROUPS.map(g => ({
+      group: g.l,
+      count: recs.filter(r => ageGroup(r.age) === g.l).length
+    }));
+
+    const gpChartData = ["Yes", "No"].map(g => ({
+      answer: g,
+      count: recs.filter(r => r.gp === g).length
+    }));
+
     // Postcode analysis
     const pcData = Array.from(new Set(records.map(r => r.postcode).filter(Boolean))).sort().map(pc => {
       const pr = records.filter(r => r.postcode === pc);
@@ -2184,27 +2261,71 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div className="fw-chart-row">
-              <div className="fw-card">
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Out-of-range Rates</div>
-                {[["Systolic BP", "bpSys", "#B91C1C"], ["Diastolic BP", "bpDia", "#B91C1C"], ["BMI", "bmi", "#B45309"], ["Diabetes Risk", "diab", "#B45309"], ["Waist", "waist", "#B45309"], ["Oxygen Sat", "oxysat", "#0284C7"], ["Pulse", "pulse", "#0284C7"], ["Resp Rate", "resp", "#0284C7"]].map(([l, k, c]) => (
-                  <Bar key={l} label={l} n={fc(k)} total={total} color={c} />
-                ))}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <div className="fw-card">
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Age Group Distribution</div>
-                  {AGE_GROUPS.map(g => <Bar key={g.l} label={g.l} n={recs.filter(r => ageGroup(r.age) === g.l).length} total={total} color="#6D28D9}" />)}
-                </div>
-                <div className="fw-card">
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>GP Visit in Last 12 Months</div>
-                  {["Yes", "No"].map(g => <Bar key={g} label={g} n={recs.filter(r => r.gp === g).length} total={total} color={g === "No" ? "#B45309" : "#15803D"} />)}
-                </div>
-                <div className="fw-card">
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>By Gender</div>
-                  {["Male", "Female", "Non-Binary", "Prefer not to say"].map(g => <Bar key={g} label={g} n={recs.filter(r => r.gender === g).length} total={total} color={FED_NAVY} />)}
-                </div>
-              </div>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 16,
+              marginBottom: 18
+            }}>
+              <ChartCard title="Out-of-range readings by metric">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={riskChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <ReBar dataKey="count" name="Out-of-range count" fill="#B91C1C" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Average readings by postcode">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={postcodeChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="postcode" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <ReBar dataKey="avgBMI" name="Avg BMI" fill="#7C3AED" radius={[6, 6, 0, 0]} />
+                    <ReBar dataKey="avgSysBP" name="Avg Sys BP" fill="#B91C1C" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Age group distribution">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={ageChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="group" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <ReBar dataKey="count" name="Participants" fill="#002060" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="GP visit status">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={gpChartData}
+                      dataKey="count"
+                      nameKey="answer"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      label
+                    >
+                      {gpChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 0 ? "#15803D" : "#B45309"} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartCard>
             </div>
           </>}
 
