@@ -1399,7 +1399,89 @@ export default function App() {
       alert("Could not send email report. Check backend terminal.");
     }
   };
+  const downloadCSV = () => {
+    const source = screen === "dashboard" ? records : [];
 
+    if (!source.length) {
+      alert("No records available to download.");
+      return;
+    }
+
+    const headers = [
+      "Session ID",
+      "Date",
+      "Age",
+      "Gender",
+      "Patient Postcode",
+      "GP Visit",
+      "Event Location",
+      "Student Nurse",
+      "Supervisor / RN",
+      "Systolic BP",
+      "Diastolic BP",
+      "Pulse",
+      "Respiratory Rate",
+      "Oxygen Saturation",
+      "Temperature",
+      "Height",
+      "Weight",
+      "Waist",
+      "BMI",
+      "Diabetes Risk Score",
+      "Notes",
+      "Status"
+    ];
+
+    const escapeCSV = value => {
+      if (value === null || value === undefined) return "";
+      return `"${String(value).replace(/"/g, '""')}"`;
+    };
+
+    const rows = source.map(r => [
+      r.id,
+      r.d,
+      r.age,
+      r.gender,
+      r.postcode,
+      r.gp,
+      r.loc,
+      r.sn,
+      r.rn,
+      r.bpSys,
+      r.bpDia,
+      r.pulse,
+      r.resp,
+      r.oxysat,
+      r.temp,
+      r.height,
+      r.weight,
+      r.waist,
+      r.bmi,
+      r.diab,
+      r.notes,
+      hasFlag(r) ? "Action required" : "Good"
+    ]);
+
+    const csv = [
+      headers.map(escapeCSV).join(","),
+      ...rows.map(row => row.map(escapeCSV).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `fedwell-health-records-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+  };
   const logout = () => { setRole(null); setScreen("login"); setPw(""); setPwEmail(""); setToken(""); setRecords([]); };
 
   // ── Theme Toggle Button ─────────────────────────────────────────────────────
@@ -2167,7 +2249,25 @@ export default function App() {
               <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)" }}>Health Trends Dashboard</h2>
               <p style={{ fontSize: 14, color: "var(--muted)", marginTop: 4 }}><strong>{records.length}</strong> total sessions · Postcode-based demographic analysis · No patient names stored</p>
             </div>
-            <FedUniLogo white={isDark} height={30} />
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                onClick={downloadCSV}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: `1.5px solid ${FED_NAVY}`,
+                  background: FED_NAVY,
+                  color: "white",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                Download CSV
+              </button>
+
+              <FedUniLogo white={isDark} height={30} />
+            </div>
           </div>
 
           {/* Tabs */}
