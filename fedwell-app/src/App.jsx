@@ -1159,7 +1159,17 @@ export default function App() {
     });
   };
   const addLoc = loc => { if (!locations.includes(loc)) setLocs(ls => [...ls, loc]); };
-  const resetForm = () => { setForm({ checkDate: new Date().toISOString().split("T")[0] }); setMS(0); setSaved(null); setGO(false); setSP(false); };
+  const resetForm = () => {
+    setForm({
+      checkDate: new Date().toISOString().split("T")[0],
+      loc: localStorage.getItem("fedwell_event_location") || ""
+    });
+
+    setMS(0);
+    setSaved(null);
+    setGO(false);
+    setSP(false);
+  };
   const startNew = () => { resetForm(); setScreen("clientdetails"); };
 
   const doLogin = async () => {
@@ -1238,7 +1248,7 @@ export default function App() {
       postcode: form.postcode || "",
       seen_gp: form.seenGP || "",
       loc: form.loc || "Not specified",
-      clinic_postcode: form.clinicPostcode || "",
+      clinic_postcode: "",
       student_nurse: form.sn || "",
       supervisor: form.rn || "",
       bp_sys: form.bpSys ? parseFloat(form.bpSys) : null,
@@ -1280,7 +1290,7 @@ export default function App() {
         postcode: form.postcode || "",
         gp: form.seenGP || "",
         loc: form.loc || "Not specified",
-        clinicPostcode: form.clinicPostcode || "",
+        clinicPostcode: "",
         sn: form.sn || "",
         rn: form.rn || "",
         bpSys: body.bp_sys,
@@ -1748,7 +1758,10 @@ export default function App() {
               <input
                 className="fw-input"
                 value={f.loc || ""}
-                onChange={e => setF("loc", e.target.value)}
+                onChange={e => {
+                  setF("loc", e.target.value);
+                  localStorage.setItem("fedwell_event_location", e.target.value);
+                }}
                 placeholder="Enter event or pop-up location"
               />
             </div>
