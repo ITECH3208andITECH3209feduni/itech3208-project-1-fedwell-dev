@@ -162,6 +162,24 @@ const buildStyles = () => `
   }
 `;
 
+// ─── helper functions ───────────────────────────────────────────────────────────
+
+const stopWheel = e => e.currentTarget.blur();
+
+const digitsOnly = (value, maxLength) => {
+  return String(value || "").replace(/\D/g, "").slice(0, maxLength);
+};
+
+const decimalOnly = value => {
+  const cleaned = String(value || "").replace(/[^\d.]/g, "");
+  const parts = cleaned.split(".");
+  return parts.length > 1 ? `${parts[0]}.${parts.slice(1).join("")}` : cleaned;
+};
+
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+
+const todayISO = new Date().toISOString().split("T")[0];
+
 // ─── Clinical ranges ──────────────────────────────────────────────────────────
 const RANGES = {
   bpSys: { lo: 100, hi: 140, u: "mmHg", l: "Systolic BP" },
@@ -1109,6 +1127,35 @@ export default function App() {
   const [loginErr, setLE] = useState("");
   const [genderOther, setGO] = useState(false);
   const [showPrint, setSP] = useState(false);
+  const [formErr, setFormErr] = useState("");
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem("fedwell_token");
+    const savedRole = localStorage.getItem("fedwell_role");
+    const savedScreen = localStorage.getItem("fedwell_screen");
+    const savedForm = localStorage.getItem("fedwell_form_draft");
+
+    if (savedToken && savedRole) {
+      setToken(savedToken);
+      setRole(savedRole);
+      setScreen(savedScreen || (savedRole === "teacher" ? "dashboard" : "clientdetails"));
+
+      if (savedForm) {
+        try {
+          setForm(JSON.parse(savedForm));
+        } catch {
+          setForm({ checkDate: new Date().toISOString().split("T")[0] });
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (role === "staff") {
+      localStorage.setItem("fedwell_form_draft", JSON.stringify(form));
+      localStorage.setItem("fedwell_screen", screen);
+    }
+  }, [form, screen, role]);
 
   // Inject styles + apply theme
   useEffect(() => {
@@ -1187,6 +1234,8 @@ export default function App() {
   };
 
   const setF = (k, v) => {
+    setFormErr("");
+
     setForm(f => {
       const updated = { ...f, [k]: v };
 
@@ -1239,6 +1288,10 @@ export default function App() {
       setToken(data.token);
       setRole(data.role);
 
+      localStorage.setItem("fedwell_token", data.token);
+      localStorage.setItem("fedwell_role", data.role);
+      localStorage.setItem("fedwell_screen", data.role === "teacher" ? "dashboard" : "clientdetails");
+
       if (data.role === "staff") {
         setScreen("clientdetails");
         resetForm();
@@ -1256,6 +1309,7 @@ export default function App() {
   const proceed = () => {
     const f = form;
     const miss = [];
+
     if (!f.name) miss.push("Full Name");
     if (!f.age) miss.push("Age");
     if (!f.gender) miss.push("Gender");
@@ -1263,8 +1317,15 @@ export default function App() {
     if (!f.checkDate) miss.push("Check Date");
     if (!f.sn) miss.push("Student Nurse");
     if (!f.rn) miss.push("Supervisor / Registered Nurse");
-    if (miss.length) { alert("Please fill in:\n• " + miss.join("\n• ")); return; }
-    setMS(0); setScreen("metric");
+
+    if (miss.length) {
+      setFormErr("Please complete: " + miss.join(", "));
+      return;
+    }
+
+    setFormErr("");
+    setMS(0);
+    setScreen("metric");
   };
 
   const doSave = async () => {
@@ -1482,7 +1543,19 @@ export default function App() {
 
     URL.revokeObjectURL(url);
   };
-  const logout = () => { setRole(null); setScreen("login"); setPw(""); setPwEmail(""); setToken(""); setRecords([]); };
+  const logout = () => {
+    localStorage.removeItem("fedwell_token");
+    localStorage.removeItem("fedwell_role");
+    localStorage.removeItem("fedwell_screen");
+    localStorage.removeItem("fedwell_form_draft");
+
+    setRole(null);
+    setScreen("login");
+    setPw("");
+    setPwEmail("");
+    setToken("");
+    setRecords([]);
+  };
 
   // ── Theme Toggle Button ─────────────────────────────────────────────────────
   const ThemeBtn = () => (
@@ -1792,6 +1865,21 @@ export default function App() {
             <p style={{ fontSize: 14, color: "var(--muted)", marginTop: 4 }}>Name appears on the printed report only — never stored in the database.</p>
           </div>
 
+          {formErr && (
+            <div style={{
+              background: "#FEF2F2",
+              border: "1px solid #B91C1C",
+              color: "#B91C1C",
+              borderRadius: 8,
+              padding: "10px 12px",
+              fontSize: 13,
+              marginBottom: 14,
+              fontWeight: 600
+            }}>
+              {formErr}
+            </div>
+          )}
+
           <SCard gradient={`linear-gradient(135deg,${FED_NAVY},#003476)`} icon="👤" label="Patient Details">
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Full Name <span style={{ color: "#B91C1C" }}>*</span></label>
@@ -1824,11 +1912,27 @@ export default function App() {
             <div className="fw-grid2" style={{ marginBottom: 14 }}>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Age <span style={{ color: "#B91C1C" }}>*</span></label>
-                <input className="fw-input" type="number" value={f.age || ""} onChange={e => setF("age", e.target.value)} placeholder="e.g. 45" />
+                <input
+                  className="fw-input"
+                  type="text"
+                  inputMode="numeric"
+                  value={f.postcode || ""}
+                  onChange={e => setF("postcode", digitsOnly(e.target.value, 4))}
+                  placeholder="e.g. 3840"
+                  maxLength={4}
+                  style={{ ...iStyle("ok", !!f.postcode) }}
+                />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Date of Birth</label>
-                <input className="fw-input" type="date" value={f.dob || ""} onChange={e => setF("dob", e.target.value)} />
+                <input
+                  className="fw-input"
+                  type="date"
+                  value={f.checkDate || ""}
+                  min="2025-01-01"
+                  max={todayISO}
+                  onChange={e => setF("checkDate", e.target.value)}
+                />
               </div>
             </div>
             <div style={{ marginBottom: 14 }}>
@@ -1849,7 +1953,17 @@ export default function App() {
                 <button onClick={() => { setGO(true); setF("gender", ""); }}
                   style={{ padding: "8px 14px", borderRadius: 8, border: `1.5px solid ${isOther ? FED_NAVY : "var(--bdk)"}`, background: isOther ? (isDark ? `rgba(0,32,96,0.4)` : `rgba(0,32,96,0.06)`) : "var(--surface)", color: isOther ? FED_NAVY : "var(--text)", fontSize: 13, fontWeight: isOther ? 700 : 400, cursor: "pointer" }}>Other…</button>
               </div>
-              {isOther && <input className="fw-input" autoFocus value={(!PRESET.includes(f.gender) && f.gender) || ""} onChange={e => setF("gender", e.target.value)} placeholder="Please specify gender…" style={{ marginTop: 8 }} />}
+              {isOther && (
+                <input
+                  className="fw-input"
+                  autoFocus
+                  maxLength={30}
+                  value={(!PRESET.includes(f.gender) && f.gender) || ""}
+                  onChange={e => setF("gender", e.target.value.slice(0, 30))}
+                  placeholder="Please specify gender…"
+                  style={{ marginTop: 8 }}
+                />
+              )}
             </div>
             <div>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 8, color: "var(--text)" }}>Seen a GP in last 12 months?</label>
@@ -1976,7 +2090,14 @@ export default function App() {
                         style={{ resize: "vertical", height: 100 }} />
                     ) : (
                       <div style={{ display: "flex", alignItems: "center" }}>
-                        <input className="fw-input" type="number" value={v} onChange={e => setF(fld.k, e.target.value)} placeholder={fld.ph}
+                        <input
+                          className="fw-input"
+                          type="text"
+                          inputMode="decimal"
+                          value={v}
+                          onWheel={stopWheel}
+                          onChange={e => setF(fld.k, decimalOnly(e.target.value))}
+                          placeholder={fld.ph}
                           style={{ flex: 1, fontSize: 20, fontWeight: 600, ...inputExtra }} />
                         {fld.unit && <span style={{ fontSize: 14, color: "var(--muted)", marginLeft: 10, fontWeight: 500, flexShrink: 0 }}>{fld.unit}</span>}
                       </div>
@@ -1989,7 +2110,10 @@ export default function App() {
 
               {flaggedFields.length > 0 && (
                 <div style={{ background: isDark ? "#2D0A0A" : "#FEF2F2", border: "1.5px solid #B91C1C", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#B91C1C" }}>
-                  <strong>⚠ Out of range</strong>
+                  <strong>Needs review</strong>
+                  <div style={{ marginTop: 4 }}>
+                    This reading is outside the normal adult range.
+                  </div>
                 </div>
               )}
 
@@ -2048,7 +2172,7 @@ export default function App() {
                 <div key={label} style={{ background: flag !== "ok" ? "#FEF2F2" : value && value !== "—" ? "#F0FDF4" : "var(--surface2)", borderRadius: 8, padding: "10px 14px", border: `1px solid ${flag !== "ok" ? "#B91C1C" : value && value !== "—" ? "#15803D" : "var(--border)"}` }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: flag !== "ok" ? "#B91C1C" : "var(--muted)", marginBottom: 2 }}>{label}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: flag !== "ok" ? "#B91C1C" : "var(--text)" }}>{value} <span style={{ fontSize: 11, fontWeight: 400, color: "var(--muted)" }}>{unit}</span></div>
-                  {flag !== "ok" && <div style={{ fontSize: 10, color: "#B91C1C", marginTop: 2 }}>⚠ Out of range</div>}
+                  {flag !== "ok" && <div style={{ fontSize: 10, color: "#B91C1C", marginTop: 2 }}>Needs review</div>}
                   {flag === "ok" && value && value !== "—" && <div style={{ fontSize: 10, color: "#15803D", marginTop: 2 }}>✓ In range</div>}
                 </div>
               ))}
