@@ -1916,11 +1916,11 @@ export default function App() {
                   className="fw-input"
                   type="text"
                   inputMode="numeric"
-                  value={f.postcode || ""}
-                  onChange={e => setF("postcode", digitsOnly(e.target.value, 4))}
-                  placeholder="e.g. 3840"
-                  maxLength={4}
-                  style={{ ...iStyle("ok", !!f.postcode) }}
+                  value={f.age || ""}
+                  maxLength={3}
+                  onWheel={stopWheel}
+                  onChange={e => setF("age", digitsOnly(e.target.value, 3))}
+                  placeholder="e.g. 45"
                 />
               </div>
               <div>
@@ -1937,8 +1937,16 @@ export default function App() {
             </div>
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Patient Home Postcode <span style={{ color: "#B91C1C" }}>*</span></label>
-              <input className="fw-input" value={f.postcode || ""} onChange={e => setF("postcode", e.target.value)} placeholder="e.g. 3840" maxLength={4}
-                style={{ ...iStyle("ok", !!f.postcode) }} />
+              <input
+                className="fw-input"
+                type="text"
+                inputMode="numeric"
+                value={f.postcode || ""}
+                onChange={e => setF("postcode", digitsOnly(e.target.value, 4))}
+                placeholder="e.g. 3840"
+                maxLength={4}
+                style={{ ...iStyle("ok", !!f.postcode) }}
+              />
               <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Patient's home postcode — used to map future pop-up clinic locations</div>
             </div>
             <div style={{ marginBottom: 14 }}>
