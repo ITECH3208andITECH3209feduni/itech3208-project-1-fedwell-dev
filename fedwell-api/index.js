@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
 
 const authRoutes = require("./routes/auth");
 const recordRoutes = require("./routes/records");
@@ -10,42 +9,48 @@ const emailRoutes = require("./routes/email");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://itech3208-project-1-fedwell-dev-fed.vercel.app",
-  "https://itech3208-project-1-fedwell-dev-fed-flame.vercel.app"
-];
+// Manual CORS middleware for Vercel
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-const corsOptions = {
-  origin(origin, callback) {
-    // Allows requests from tools like Postman/cURL and same-origin requests
-    if (!origin) {
-      return callback(null, true);
-    }
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://itech3208-project-1-fedwell-dev-fed.vercel.app",
+    "https://itech3208-project-1-fedwell-dev-fed-flame.vercel.app"
+  ];
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
 
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-};
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-app.use(cors(corsOptions));
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
 
-// Handles browser preflight requests
-app.options(/.*/, cors(corsOptions));
+  next();
+});
 
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
   res.json({
     status: "FedWELL API is running",
-    timestamp: new Date()
+    timestamp: new Date(),
+    origin: req.headers.origin || null
+  });
+});
+
+app.get("/cors-test", (req, res) => {
+  res.json({
+    ok: true,
+    message: "CORS test passed",
+    origin: req.headers.origin || null
   });
 });
 
@@ -53,7 +58,6 @@ app.use("/auth", authRoutes);
 app.use("/api/records", recordRoutes);
 app.use("/api/email", emailRoutes);
 
-// Global error handler, including CORS errors
 app.use((err, req, res, next) => {
   console.error("API error:", err);
 
