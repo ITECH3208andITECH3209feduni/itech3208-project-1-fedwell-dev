@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://itech3208-project-1-fedwell-dev-fed.vercel.app"
+  "https://itech3208-project-1-fedwell-dev-fed.vercel.app",
+  "https://itech3208-project-1-fedwell-dev-fed-flame.vercel.app"
 ];
 
 const corsOptions = {
