@@ -1107,7 +1107,10 @@ export default function App() {
   const [theme, setTheme] = useState("light");
   const [role, setRole] = useState(null);
   const [screen, setScreen] = useState("login");
-  const [form, setForm] = useState({ checkDate: new Date().toISOString().split("T")[0] });
+  const [form, setForm] = useState({
+    checkDate: new Date().toISOString().split("T")[0],
+    loc: localStorage.getItem("fedwell_event_location") || ""
+  });
   const [saved, setSaved] = useState(null);
   const [metricStep, setMS] = useState(0);
   const [records, setRecords] = useState([]);
@@ -1142,9 +1145,21 @@ export default function App() {
 
       if (savedForm) {
         try {
-          setForm(JSON.parse(savedForm));
+          const draft = JSON.parse(savedForm);
+          const today = new Date().toISOString().split("T")[0];
+
+          setForm({
+            ...draft,
+            checkDate: !draft.checkDate || draft.checkDate < "2025-01-01"
+              ? today
+              : draft.checkDate,
+            loc: draft.loc || localStorage.getItem("fedwell_event_location") || ""
+          });
         } catch {
-          setForm({ checkDate: new Date().toISOString().split("T")[0] });
+          setForm({
+            checkDate: new Date().toISOString().split("T")[0],
+            loc: localStorage.getItem("fedwell_event_location") || ""
+          });
         }
       }
     }
@@ -1223,6 +1238,8 @@ export default function App() {
   const brandText = isDark ? "#93C5FD" : FED_NAVY;
   const brandSoftBg = isDark ? "rgba(147,197,253,0.14)" : "rgba(0,32,96,0.08)";
 
+
+
   const calculateBMI = (heightCm, weightKg) => {
     const h = parseFloat(heightCm);
     const w = parseFloat(weightKg);
@@ -1233,6 +1250,70 @@ export default function App() {
     return (w / (heightM * heightM)).toFixed(1);
   };
 
+  const parseDateValue = value => {
+    if (!value) return null;
+
+    const text = String(value).trim();
+
+    // YYYY-MM-DD format, used by checkDate
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      const [y, m, d] = text.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    // DD/MM/YYYY format, used by DOB
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) {
+      const [d, m, y] = text.split("/").map(Number);
+
+      const date = new Date(y, m - 1, d);
+
+      // Reject impossible dates like 31/02/2004
+      if (
+        date.getFullYear() !== y ||
+        date.getMonth() !== m - 1 ||
+        date.getDate() !== d
+      ) {
+        return null;
+      }
+
+      return date;
+    }
+
+    return null;
+  };
+
+  const formatDOBInput = value => {
+    const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
+
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+
+    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+  };
+
+  const calculateAge = dob => {
+    const birthDate = parseDateValue(dob);
+    const referenceDate = new Date();
+
+    if (!birthDate) return "";
+
+    let age = referenceDate.getFullYear() - birthDate.getFullYear();
+
+    const birthdayThisYear = new Date(
+      referenceDate.getFullYear(),
+      birthDate.getMonth(),
+      birthDate.getDate()
+    );
+
+    if (referenceDate < birthdayThisYear) {
+      age--;
+    }
+
+    if (age < 0 || age > 120) return "";
+
+    return String(age);
+  };
+
   const setF = (k, v) => {
     setFormErr("");
 
@@ -1241,6 +1322,10 @@ export default function App() {
 
       if (k === "height" || k === "weight") {
         updated.bmi = calculateBMI(updated.height, updated.weight);
+      }
+
+      if (k === "dob" || k === "checkDate") {
+        updated.age = calculateAge(updated.dob);
       }
 
       return updated;
@@ -1920,18 +2005,19 @@ export default function App() {
                   maxLength={3}
                   onWheel={stopWheel}
                   onChange={e => setF("age", digitsOnly(e.target.value, 3))}
-                  placeholder="e.g. 45"
+                  placeholder="Auto-filled from DOB, or enter manually"
                 />
               </div>
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Date of Birth</label>
                 <input
                   className="fw-input"
-                  type="date"
-                  value={f.checkDate || ""}
-                  min="2025-01-01"
-                  max={todayISO}
-                  onChange={e => setF("checkDate", e.target.value)}
+                  type="text"
+                  inputMode="numeric"
+                  value={f.dob || ""}
+                  onChange={e => setF("dob", formatDOBInput(e.target.value))}
+                  placeholder="DD/MM/YYYY"
+                  maxLength={10}
                 />
               </div>
             </div>
@@ -2010,8 +2096,24 @@ export default function App() {
             </div>
             <div className="fw-grid2" style={{ marginBottom: 14 }}>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Check Date <span style={{ color: "#B91C1C" }}>*</span></label>
-                <input className="fw-input" type="date" value={f.checkDate || ""} onChange={e => setF("checkDate", e.target.value)} />
+                <label style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  display: "block",
+                  marginBottom: 5,
+                  color: "var(--text)"
+                }}>
+                  Check Date <span style={{ color: "#B91C1C" }}>*</span>
+                </label>
+
+                <input
+                  className="fw-input"
+                  type="date"
+                  value={f.checkDate || new Date().toISOString().split("T")[0]}
+                  min="2025-01-01"
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={e => setF("checkDate", e.target.value)}
+                />
               </div>
             </div>
             <div className="fw-grid2">
