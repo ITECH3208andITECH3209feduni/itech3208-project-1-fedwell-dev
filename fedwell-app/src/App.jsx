@@ -805,6 +805,23 @@ const Bar = ({ label, n, total, color }) => {
   );
 };
 
+const normalRangeText = (key) => {
+  const ranges = {
+    bp: "Systolic 100–140 mmHg / Diastolic 60–90 mmHg",
+    pulse: "60–100 bpm",
+    resp: "12–20 /min",
+    oxysat: "≥95 %",
+    temp: "36.0–37.5 °C",
+    height: "—",
+    weight: "—",
+    waist: "Men: 94+ cm increased, 102+ cm greatly increased / Women: 80+ cm increased, 88+ cm greatly increased",
+    bmi: "18.5–24.9 healthy weight",
+    diab: "6–11 increased risk, 12+ high risk"
+  };
+
+  return ranges[key] || "—";
+};
+
 const HealthLinks = ({ flagKey, status }) => {
   const links = (HEALTH_LINKS[flagKey] || {})[status] || [];
   if (!links.length) return null;
@@ -860,27 +877,124 @@ function LocationInput({ value, onChange, locations, onAddLocation }) {
 // ─── Print Report Component ───────────────────────────────────────────────────
 function PrintReport({ saved }) {
   const { patient, rec, flags } = saved;
-  const flagged = Object.keys(flags).filter(k => flags[k] !== "ok");
-  const allMetrics = [
-    { label: "Blood Pressure", value: `${rec.bpSys || "—"}/${rec.bpDia || "—"}`, unit: "mmHg", flag: flags.bpSys === "ok" && flags.bpDia === "ok" ? "ok" : flags.bpSys || flags.bpDia },
-    { label: "Pulse", value: rec.pulse, unit: "bpm", flag: flags.pulse, fk: "pulse" },
-    { label: "Respiratory Rate", value: rec.resp, unit: "/min", flag: flags.resp, fk: "resp" },
-    { label: "Oxygen Saturation", value: rec.oxysat, unit: "%", flag: flags.oxysat, fk: "oxysat" },
-    { label: "Temperature", value: rec.temp, unit: "°C", flag: flags.temp, fk: "temp" },
-    { label: "Height", value: rec.height, unit: "cm", flag: "ok" },
-    { label: "Weight", value: rec.weight, unit: "kg", flag: "ok" },
-    { label: "Waist", value: rec.waist, unit: "cm", flag: flags.waist, fk: "waist" },
-    { label: "BMI", value: rec.bmi, unit: "kg/m²", flag: flags.bmi, fk: "bmi" },
-    { label: "Diabetes Risk Score", value: rec.diab, unit: "pts", flag: flags.diab, fk: "diab" },
-  ].filter(m => m.value !== null && m.value !== undefined && m.value !== "");
 
-  const flagColor = f => f === "high" ? "#990000" : f === "low" ? "#996600" : "#006600";
-  const flagBg = f => f === "high" ? "#FFEAEA" : f === "low" ? "#FFF8E8" : "#EAFFF0";
-  const flagLabel = f => f === "high" ? "▲ HIGH" : f === "low" ? "▼ LOW" : "✓ OK";
+  const flagColor = f =>
+    f === "high" ? "#990000" :
+      f === "low" ? "#996600" :
+        "#006600";
+
+  const flagBg = f =>
+    f === "high" ? "#FFEAEA" :
+      f === "low" ? "#FFF8E8" :
+        "#EAFFF0";
+
+  const flagLabel = f =>
+    f === "high" ? "▲ HIGH" :
+      f === "low" ? "▼ LOW" :
+        "✓ OK";
+
+  const normalRangeText = key => {
+    const ranges = {
+      bp: "Systolic 100–140 / Diastolic 60–90 mmHg",
+      pulse: "60–100 bpm",
+      resp: "12–20 /min",
+      oxysat: "≥95 %",
+      temp: "36.0–37.5 °C",
+      height: "—",
+      weight: "—",
+      waist: "_",
+      bmi: "18.5–24.9 healthy weight",
+      diab: "0–5 lower risk, 6–11 increased risk, ≥12 high risk"
+    };
+
+    return ranges[key] || "—";
+  };
+
+  const bloodPressureFlag =
+    flags.bpSys === "ok" && flags.bpDia === "ok"
+      ? "ok"
+      : flags.bpSys !== "ok"
+        ? flags.bpSys
+        : flags.bpDia;
+
+  const flagged = Object.keys(flags).filter(k => flags[k] !== "ok");
+
+  const allMetrics = [
+    {
+      key: "bp",
+      label: "Blood Pressure",
+      value: `${rec.bpSys || "—"}/${rec.bpDia || "—"}`,
+      unit: "mmHg",
+      flag: bloodPressureFlag
+    },
+    {
+      key: "pulse",
+      label: "Pulse",
+      value: rec.pulse,
+      unit: "bpm",
+      flag: flags.pulse
+    },
+    {
+      key: "resp",
+      label: "Respiratory Rate",
+      value: rec.resp,
+      unit: "/min",
+      flag: flags.resp
+    },
+    {
+      key: "oxysat",
+      label: "Oxygen Saturation",
+      value: rec.oxysat,
+      unit: "%",
+      flag: flags.oxysat
+    },
+    {
+      key: "temp",
+      label: "Temperature",
+      value: rec.temp,
+      unit: "°C",
+      flag: flags.temp
+    },
+    {
+      key: "height",
+      label: "Height",
+      value: rec.height,
+      unit: "cm",
+      flag: "ok"
+    },
+    {
+      key: "weight",
+      label: "Weight",
+      value: rec.weight,
+      unit: "kg",
+      flag: "ok"
+    },
+    {
+      key: "waist",
+      label: "Waist",
+      value: rec.waist,
+      unit: "cm",
+      flag: flags.waist
+    },
+    {
+      key: "bmi",
+      label: "BMI",
+      value: rec.bmi,
+      unit: "kg/m²",
+      flag: flags.bmi
+    },
+    {
+      key: "diab",
+      label: "Diabetes Risk Score",
+      value: rec.diab,
+      unit: "pts",
+      flag: flags.diab
+    }
+  ].filter(m => m.value !== null && m.value !== undefined && m.value !== "");
 
   return (
     <div style={{ fontFamily: "'Inter',Arial,sans-serif", maxWidth: 700, margin: "0 auto", padding: 32, color: "#111", background: "#fff" }}>
-      {/* ── Letterhead ── */}
+      {/* Letterhead */}
       <div style={{ borderBottom: `3px solid ${FED_NAVY}`, paddingBottom: 16, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
         <div>
           <div style={{
@@ -891,9 +1005,11 @@ function PrintReport({ saved }) {
           }}>
             <FedUniLogo white={false} height={42} />
           </div>
+
           <div style={{ fontSize: 12, color: "#555" }}>Nursing Gippsland — Community Health Program</div>
           <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>federation.edu.au/nursing</div>
         </div>
+
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: 11, color: "#888" }}>Session ID</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: FED_NAVY }}>{rec.id}</div>
@@ -902,13 +1018,13 @@ function PrintReport({ saved }) {
         </div>
       </div>
 
-      {/* ── Title ── */}
+      {/* Title */}
       <div style={{ background: FED_NAVY, color: "white", borderRadius: 8, padding: "12px 18px", marginBottom: 20 }}>
         <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 2 }}>COMMUNITY HEALTH CHECK REPORT</div>
         <div style={{ fontSize: 20, fontWeight: 800 }}>Health Assessment Summary</div>
       </div>
 
-      {/* ── Patient details ── */}
+      {/* Patient details */}
       <div style={{ border: `1px solid #ddd`, borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
         <div style={{ background: FED_NAVY, color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>PATIENT INFORMATION</div>
         <div style={{ padding: 16 }}>
@@ -929,73 +1045,123 @@ function PrintReport({ saved }) {
               ))}
             </tbody>
           </table>
-          {/* temporary<div style={{marginTop:10,padding:"8px 10px",background:"#FFF8E0",border:"1px solid #E8A000",borderRadius:6,fontSize:11,color:"#7A5800"}}>
-            ⚠ This patient's name is used on this report only and is not stored in the database (as per privacy agreement dated 25 March 2026).
-          </div>*/}
         </div>
       </div>
 
-      {/* ── Readings ── */}
+      {/* Readings */}
       <div style={{ border: "1px solid #ddd", borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
         <div style={{ background: FED_NAVY, color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>HEALTH CHECK READINGS</div>
+
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ background: "#F1F5F9" }}>
               <th style={{ padding: "8px 12px", textAlign: "left", color: "#555", fontWeight: 600, borderBottom: "1.5px solid #ddd" }}>Measurement</th>
               <th style={{ padding: "8px 12px", textAlign: "right", color: "#555", fontWeight: 600, borderBottom: "1.5px solid #ddd" }}>Result</th>
               <th style={{ padding: "8px 12px", textAlign: "center", color: "#555", fontWeight: 600, borderBottom: "1.5px solid #ddd" }}>Status</th>
-              <th style={{ padding: "8px 12px", textAlign: "left", color: "#555", fontWeight: 600, borderBottom: "1.5px solid #ddd" }}>Normal Range</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", color: "#555", fontWeight: 600, borderBottom: "1.5px solid #ddd" }}>Normal Range / Risk Category</th>
             </tr>
           </thead>
+
           <tbody>
-            {allMetrics.map((m, i) => {
-              const r = RANGES[m.fk];
-              const range = r ? (m.fk === "waist" ? "M <102 / F <88" : m.fk === "oxysat" ? "≥95" : `${r.lo}–${r.hi}`) : "—";
-              return (
-                <tr key={i} style={{ background: m.flag !== "ok" ? flagBg(m.flag) : i % 2 ? "#F8FAFC" : "#fff", borderBottom: "0.5px solid #e2e8f0" }}>
-                  <td style={{ padding: "7px 12px", fontWeight: m.flag !== "ok" ? 700 : 400 }}>{m.label}</td>
-                  <td style={{ padding: "7px 12px", textAlign: "right", fontWeight: 700, fontSize: 14, color: m.flag !== "ok" ? flagColor(m.flag) : "#111" }}>
-                    {m.value} <span style={{ fontSize: 11, fontWeight: 400, color: "#888" }}>{m.unit}</span>
-                  </td>
-                  <td style={{ padding: "7px 12px", textAlign: "center" }}>
-                    <span style={{ background: flagBg(m.flag), color: flagColor(m.flag), fontWeight: 700, fontSize: 10, padding: "2px 8px", borderRadius: 999, border: `1px solid ${flagColor(m.flag)}` }}>
-                      {flagLabel(m.flag)}
-                    </span>
-                  </td>
-                  <td style={{ padding: "7px 12px", fontSize: 11, color: "#666" }}>{range} {m.unit && m.fk ? m.unit : ""}</td>
-                </tr>
-              );
-            })}
+            {allMetrics.map((m, i) => (
+              <tr
+                key={i}
+                style={{
+                  background: m.flag !== "ok" ? flagBg(m.flag) : i % 2 ? "#F8FAFC" : "#fff",
+                  borderBottom: "0.5px solid #e2e8f0"
+                }}
+              >
+                <td style={{ padding: "7px 12px", fontWeight: m.flag !== "ok" ? 700 : 400 }}>
+                  {m.label}
+                </td>
+
+                <td style={{
+                  padding: "7px 12px",
+                  textAlign: "right",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  color: m.flag !== "ok" ? flagColor(m.flag) : "#111"
+                }}>
+                  {m.value} <span style={{ fontSize: 11, fontWeight: 400, color: "#888" }}>{m.unit}</span>
+                </td>
+
+                <td style={{ padding: "7px 12px", textAlign: "center" }}>
+                  <span style={{
+                    background: flagBg(m.flag),
+                    color: flagColor(m.flag),
+                    fontWeight: 700,
+                    fontSize: 10,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    border: `1px solid ${flagColor(m.flag)}`
+                  }}>
+                    {flagLabel(m.flag)}
+                  </span>
+                </td>
+
+                <td style={{
+                  padding: "7px 12px",
+                  fontSize: 11,
+                  color: "#666",
+                  lineHeight: 1.35
+                }}>
+                  {normalRangeText(m.key)}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        {rec.notes && <div style={{ padding: "10px 14px", background: "#FAFAFA", borderTop: "1px solid #e2e8f0", fontSize: 12 }}><strong>Additional Notes:</strong> {rec.notes}</div>}
+
+        {rec.notes && (
+          <div style={{ padding: "10px 14px", background: "#FAFAFA", borderTop: "1px solid #e2e8f0", fontSize: 12 }}>
+            <strong>Additional Notes:</strong> {rec.notes}
+          </div>
+        )}
       </div>
 
-      {/* ── Out of range / Recommendations ── */}
+      {/* Readings requiring attention */}
       {flagged.length > 0 && (
         <div style={{ border: `2px solid #990000`, borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
-          <div style={{ background: "#990000", color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>⚠ READINGS REQUIRING ATTENTION & HEALTH RESOURCES</div>
+          <div style={{ background: "#990000", color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>
+            READINGS REQUIRING ATTENTION & HEALTH RESOURCES
+          </div>
+
           <div style={{ padding: 14 }}>
             <p style={{ fontSize: 11, color: "#666", marginBottom: 12 }}>
-              The following readings were outside the normal range. The nursing student has discussed these with you today.
+              The following readings were outside the normal range or indicate increased health risk. The nursing student has discussed these with you today.
               Please use the resources below and follow up with your GP if recommended.
             </p>
+
             {flagged.map(k => (
               <div key={k} style={{ marginBottom: 14, paddingBottom: 10, borderBottom: "0.5px solid #e2e8f0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: flagColor(flags[k]) }}>{RANGES[k]?.l}</div>
-                  <span style={{ background: flagBg(flags[k]), color: flagColor(flags[k]), fontWeight: 700, fontSize: 10, padding: "2px 8px", borderRadius: 999, border: `1px solid ${flagColor(flags[k])}` }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: flagColor(flags[k]) }}>
+                    {RANGES[k]?.l || k}
+                  </div>
+
+                  <span style={{
+                    background: flagBg(flags[k]),
+                    color: flagColor(flags[k]),
+                    fontWeight: 700,
+                    fontSize: 10,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    border: `1px solid ${flagColor(flags[k])}`
+                  }}>
                     {flagLabel(flags[k])}
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>🇦🇺 Australian Health Resources:</div>
+
+                <div style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>Australian Health Resources:</div>
+
                 {(HEALTH_LINKS[k]?.[flags[k]] || []).map((lk, i) => (
                   <div key={i} style={{ fontSize: 11, marginBottom: 3 }}>
-                    🔗 <a href={lk.u} style={{ color: "#0052CC" }}>{lk.l}</a>
+                    <a href={lk.u} style={{ color: "#0052CC" }}>{lk.l}</a>
                   </div>
                 ))}
               </div>
             ))}
+
             <div style={{ background: "#FFF3E0", border: "1px solid #E8A000", borderRadius: 6, padding: "8px 12px", fontSize: 11, color: "#7A5800", marginTop: 10 }}>
               <strong>Recommendation:</strong> Please make an appointment with your GP to discuss your results and follow up on any highlighted readings.
               Bring this report with you to your appointment.
@@ -1011,24 +1177,30 @@ function PrintReport({ saved }) {
         </div>
       )}
 
-      {/* ── Healthy lifestyle tips ── */}
+      {/* Healthy lifestyle tips */}
       <div style={{ border: "1px solid #ddd", borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
         <div style={{ background: "#003476", color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>GENERAL HEALTHY LIFESTYLE TIPS</div>
+
         <div style={{ padding: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
-          {["🥗 Eat a balanced diet rich in fruits, vegetables and whole grains",
-            "🚶 Aim for at least 30 minutes of moderate activity most days",
-            "🚭 If you smoke, seek support to quit — call Quitline 13 7848",
-            "🍷 Limit alcohol to recommended guidelines",
-            "😴 Get 7–9 hours of quality sleep each night",
-            "💊 Take medications as prescribed by your doctor"].map((t, i) => (
-              <div key={i} style={{ padding: "6px 8px", background: "#F8FAFC", borderRadius: 6 }}>{t}</div>
-            ))}
+          {[
+            "Eat a balanced diet rich in fruits, vegetables and whole grains",
+            "Aim for at least 30 minutes of moderate activity most days",
+            "If you smoke, seek support to quit — call Quitline 13 7848",
+            "Limit alcohol to recommended guidelines",
+            "Get 7–9 hours of quality sleep each night",
+            "Take medications as prescribed by your doctor"
+          ].map((t, i) => (
+            <div key={i} style={{ padding: "6px 8px", background: "#F8FAFC", borderRadius: 6 }}>{t}</div>
+          ))}
         </div>
       </div>
 
-      {/* ── Signature lines ── */}
+      {/* Signature lines */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}>
-        {[["Student Nurse", rec.sn || "_______________"], ["Supervisor / Registered Nurse", rec.rn || "_______________"]].map(([role, name]) => (
+        {[
+          ["Student Nurse", rec.sn || "_______________"],
+          ["Supervisor / Registered Nurse", rec.rn || "_______________"]
+        ].map(([role, name]) => (
           <div key={role}>
             <div style={{ borderTop: `1.5px solid ${FED_NAVY}`, paddingTop: 8, marginTop: 32 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: FED_NAVY }}>{role}</div>
@@ -1040,7 +1212,7 @@ function PrintReport({ saved }) {
         ))}
       </div>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <div style={{ borderTop: `2px solid ${FED_NAVY}`, paddingTop: 12, marginTop: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 10, color: "#888" }}>
@@ -1048,12 +1220,14 @@ function PrintReport({ saved }) {
             <div>CRICOS: 00103D · TEQSA ID: PRV12151 · RTO: 4909</div>
             <div>federation.edu.au · This report was generated by the FedWELL Health Check Platform</div>
           </div>
+
           <div style={{ textAlign: "right", fontSize: 10, color: "#888" }}>
             <div>Session: {rec.id}</div>
             <div>Printed: {new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</div>
             <div style={{ marginTop: 4, fontStyle: "italic" }}>Patient name not stored in database</div>
           </div>
         </div>
+
         <div style={{ fontSize: 9, color: "#aaa", marginTop: 8, textAlign: "center", borderTop: "0.5px solid #ddd", paddingTop: 6 }}>
           CONFIDENTIAL: This document contains personal health information. Please store securely and share only with your treating health practitioners.
         </div>
