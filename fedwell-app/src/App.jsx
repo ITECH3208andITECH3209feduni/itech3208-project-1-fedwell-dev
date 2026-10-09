@@ -46,6 +46,39 @@ const buildStyles = () => `
     --brand-left:linear-gradient(160deg,#050E1F 0%,#061835 55%,#081E40 100%);
     --card-hover:#1E2D45;
   }
+  [data-theme="dark"] .fw-tab,
+  [data-theme="dark"] .fw-tab * {
+    color: #DDEBFF !important;
+  }
+
+  [data-theme="dark"] .fw-tab.active,
+  [data-theme="dark"] .fw-tab.active * {
+    color: #FFFFFF !important;
+  }
+
+  [data-theme="dark"] .recharts-text,
+  [data-theme="dark"] .recharts-cartesian-axis-tick text {
+    fill: #DDEBFF !important;
+  }
+
+  [data-theme="dark"] .recharts-legend-item-text {
+    color: #DDEBFF !important;
+  }
+
+  [data-theme="dark"] .recharts-tooltip-wrapper {
+    color: #0F172A !important;
+  }
+
+  [data-theme="dark"] select,
+  [data-theme="dark"] option {
+    color: #FFFFFF;
+    background: #23324A;
+  }
+
+  [data-theme="dark"] .fw-card,
+  [data-theme="dark"] .fw-filter-card {
+    color: #EAF2FF;
+  }
 
   /* ── Layout ── */
   .fw-page{min-height:100vh;background:var(--bg);color:var(--text)}
@@ -2680,12 +2713,32 @@ export default function App() {
 
           {/* Tabs */}
           <div style={{ display: "flex", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
-            {[["overview", "📊 Overview"], ["postcodes", "📮 By Postcode"], ["records", "🗂 Records"]].map(([t, label]) => (
-              <button key={t} onClick={() => setDashTab(t)}
-                style={{ padding: "8px 16px", borderRadius: 9, border: `1.5px solid ${dashTab === t ? FED_NAVY : "var(--border)"}`, background: dashTab === t ? (isDark ? `rgba(0,32,96,0.4)` : `rgba(0,32,96,0.08)`) : "var(--surface)", color: dashTab === t ? FED_NAVY : "var(--muted)", fontSize: 13, fontWeight: dashTab === t ? 700 : 400, cursor: "pointer" }}>
-                {label}
-              </button>
-            ))}
+            {[["overview", "Overview"], ["postcodes", "By Postcode"], ["records", "Records"]].map(([t, label]) => {
+              const active = dashTab === t;
+
+              return (
+                <button
+                  key={t}
+                  onClick={() => setDashTab(t)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 9,
+                    border: `1.5px solid ${active ? FED_NAVY : "var(--border)"}`,
+                    background: active
+                      ? FED_NAVY
+                      : "var(--surface)",
+                    color: active
+                      ? "#FFFFFF"
+                      : "var(--muted)",
+                    fontSize: 13,
+                    fontWeight: active ? 700 : 400,
+                    cursor: "pointer"
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Filters */}
