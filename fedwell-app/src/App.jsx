@@ -1292,7 +1292,7 @@ const SCard = ({ gradient, icon, label, children }) => (
 );
 
 const ChartCard = ({ title, children }) => (
-  <div className="fw-card" style={{ minHeight: 330 }}>
+  <div className="fw-card" style={{ minHeight: 360 }}>
     <div style={{
       fontSize: 11,
       fontWeight: 800,
@@ -1304,7 +1304,7 @@ const ChartCard = ({ title, children }) => (
     }}>
       {title}
     </div>
-    <div style={{ width: "100%", height: 260 }}>
+    <div style={{ width: "100%", height: 290 }}>
       {children}
     </div>
   </div>
@@ -1326,6 +1326,7 @@ export default function App() {
   const [dashFilter, setDF] = useState({
     year: "All",
     postcode: "All",
+    ageRange: "All",
     gender: "All",
     gp: "All"
   });
@@ -2613,6 +2614,29 @@ export default function App() {
       "All",
       ...Array.from(new Set(records.map(r => r.postcode).filter(Boolean))).sort()
     ];
+    const ageRanges = [
+      "All",
+      "Under 18",
+      "18–30",
+      "31–45",
+      "46–60",
+      "61+"
+    ];
+
+    const inAgeRange = (age, range) => {
+      const n = Number(age);
+
+      if (range === "All") return true;
+      if (!Number.isFinite(n)) return false;
+
+      if (range === "Under 18") return n < 18;
+      if (range === "18–30") return n >= 18 && n <= 30;
+      if (range === "31–45") return n >= 31 && n <= 45;
+      if (range === "46–60") return n >= 46 && n <= 60;
+      if (range === "61+") return n >= 61;
+
+      return true;
+    };
 
 
 
@@ -2623,6 +2647,7 @@ export default function App() {
       if (df.postcode !== "All" && r.postcode !== df.postcode) return false;
       if (df.gender !== "All" && r.gender !== df.gender) return false;
       if (df.gp !== "All" && r.gp !== df.gp) return false;
+      if (df.ageRange !== "All" && !inAgeRange(r.age, df.ageRange)) return false;
       return true;
     });
     const total = recs.length;
@@ -2630,12 +2655,12 @@ export default function App() {
     const fc = k => recs.filter(r => getFlag(k, r[k], r.gender) !== "ok").length;
 
     const riskChartData = [
-      { metric: "Systolic BP", count: fc("bpSys") },
-      { metric: "Diastolic BP", count: fc("bpDia") },
+      { metric: "Sys BP", count: fc("bpSys") },
+      { metric: "Dia BP", count: fc("bpDia") },
       { metric: "BMI", count: fc("bmi") },
       { metric: "Diabetes", count: fc("diab") },
       { metric: "Waist", count: fc("waist") },
-      { metric: "Oxygen Sat", count: fc("oxysat") },
+      { metric: "Oxygen", count: fc("oxysat") },
       { metric: "Pulse", count: fc("pulse") },
       { metric: "Resp Rate", count: fc("resp") }
     ];
@@ -2749,6 +2774,7 @@ export default function App() {
               {[
                 ["year", "Year", allYears],
                 ["postcode", "Patient Postcode", allPostcodes],
+                ["ageRange", "Age Range", ageRanges],
                 ["gender", "Gender", ["All", "Male", "Female", "Non-Binary", "Prefer not to say", "Other"]],
                 ["gp", "GP Visit?", ["All", "Yes", "No"]]
               ].map(([k, label, opts]) => (
@@ -2830,12 +2856,27 @@ export default function App() {
             }}>
               <ChartCard title="Out-of-range readings by metric">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={riskChartData}>
+                  <BarChart
+                    data={riskChartData}
+                    margin={{ top: 10, right: 20, left: 5, bottom: 45 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
+                    <XAxis
+                      dataKey="metric"
+                      interval={0}
+                      angle={-25}
+                      textAnchor="end"
+                      height={60}
+                      tick={{ fontSize: 10 }}
+                    />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
-                    <ReBar dataKey="count" name="Out-of-range count" fill="#B91C1C" radius={[6, 6, 0, 0]} />
+                    <ReBar
+                      dataKey="count"
+                      name="Out-of-range count"
+                      fill="#B91C1C"
+                      radius={[6, 6, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
@@ -2868,22 +2909,26 @@ export default function App() {
 
               <ChartCard title="GP visit status">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 20, bottom: 25, left: 20 }}>
                     <Pie
                       data={gpChartData}
                       dataKey="count"
                       nameKey="answer"
                       cx="50%"
-                      cy="50%"
-                      outerRadius={90}
-                      label
+                      cy="45%"
+                      outerRadius={75}
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
                     >
                       {gpChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index === 0 ? "#15803D" : "#B45309"} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={index === 0 ? "#B45309" : "#15803D"}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
-                    <Legend />
+                    <Legend verticalAlign="bottom" height={28} />
                   </PieChart>
                 </ResponsiveContainer>
               </ChartCard>
