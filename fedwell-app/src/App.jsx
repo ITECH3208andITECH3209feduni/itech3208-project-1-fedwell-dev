@@ -197,20 +197,6 @@ const buildStyles = () => `
 
 // ─── helper functions ───────────────────────────────────────────────────────────
 
-const handleAuthExpired = () => {
-  localStorage.removeItem("fedwell_token");
-  localStorage.removeItem("fedwell_role");
-  localStorage.removeItem("fedwell_screen");
-  localStorage.removeItem("fedwell_form_draft");
-
-  setToken("");
-  setRole(null);
-  setScreen("login");
-  setRecords([]);
-  setSaved(null);
-
-  alert("Your session has expired. Please sign in again.");
-};
 
 const blobToBase64 = blob => {
   return new Promise((resolve, reject) => {
@@ -1370,6 +1356,25 @@ export default function App() {
   const [showPrint, setSP] = useState(false);
   const [formErr, setFormErr] = useState("");
 
+  const clearSession = () => {
+    localStorage.removeItem("fedwell_token");
+    localStorage.removeItem("fedwell_role");
+    localStorage.removeItem("fedwell_screen");
+    localStorage.removeItem("fedwell_form_draft");
+
+    setToken("");
+    setRole(null);
+    setScreen("login");
+    setRecords([]);
+    setSaved(null);
+  };
+
+  const handleAuthExpired = () => {
+    clearSession();
+    alert("Your session has expired. Please sign in again.");
+  };
+
+
   useEffect(() => {
     const savedToken = localStorage.getItem("fedwell_token");
     const savedRole = localStorage.getItem("fedwell_role");
@@ -1630,6 +1635,11 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok) {
+        localStorage.removeItem("fedwell_token");
+        localStorage.removeItem("fedwell_role");
+        localStorage.removeItem("fedwell_screen");
+        setToken("");
+        setRole(null);
         setLE(data.error || "Login failed");
         return;
       }
@@ -1723,6 +1733,11 @@ export default function App() {
         },
         body: JSON.stringify(body)
       });
+
+      if (res.status === 401 || res.status === 403) {
+        handleAuthExpired();
+        return;
+      }
 
       const data = await res.json();
 
@@ -1825,6 +1840,11 @@ export default function App() {
           pdfBase64
         })
       });
+
+      if (res.status === 401 || res.status === 403) {
+        handleAuthExpired();
+        return;
+      }
 
       const data = await res.json();
 
@@ -2903,6 +2923,7 @@ export default function App() {
                   onClick={() => setDF({
                     year: "All",
                     postcode: "All",
+                    ageRange: "All",
                     gender: "All",
                     gp: "All"
                   })}
@@ -2933,12 +2954,7 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-              marginBottom: 18
-            }}>
+            <div className="fw-dashboard-charts">
               <ChartCard title="Out-of-range readings by metric">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
