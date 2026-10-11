@@ -1,7 +1,5 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
 
 const router = express.Router();
 
@@ -27,98 +25,112 @@ router.post("/send-report", async (req, res) => {
       });
     }
 
-    const isProduction = process.env.NODE_ENV === "production";
+    let pdfBuffer = null;
 
-    browser = await puppeteer.launch({
-      args: isProduction ? chromium.args : [],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: isProduction
-        ? await chromium.executablePath()
-        : undefined,
-      headless: chromium.headless
-    });
+    try {
+      const puppeteer = require("puppeteer-core");
+      const chromium = require("@sparticuz/chromium");
 
-    const page = await browser.newPage();
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless
+      });
 
-    const fullHtml = `
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>FedWELL Report ${sessionId}</title>
-          <style>
-            body {
-              margin: 0;
-              background: #ffffff;
-              font-family: Arial, Helvetica, sans-serif;
-            }
+      const page = await browser.newPage();
 
-            table {
-              page-break-inside: auto;
-            }
+      const fullHtml = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>FedWELL Report ${sessionId}</title>
+            <style>
+              body {
+                margin: 0;
+                background: #ffffff;
+                font-family: Arial, Helvetica, sans-serif;
+              }
 
-            tr {
-              page-break-inside: avoid;
-              page-break-after: auto;
-            }
+              table {
+                page-break-inside: auto;
+              }
 
-            a {
-              color: #0052cc;
-            }
-          </style>
-        </head>
-        <body>
-          ${reportHtml}
-        </body>
-      </html>
-    `;
+              tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+              }
 
-    await page.setContent(fullHtml, {
-      waitUntil: "networkidle0"
-    });
+              a {
+                color: #0052cc;
+              }
+            </style>
+          </head>
+          <body>
+            ${reportHtml}
+          </body>
+        </html>
+      `;
 
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "10mm",
-        right: "10mm",
-        bottom: "10mm",
-        left: "10mm"
+      await page.setContent(fullHtml, {
+        waitUntil: "networkidle0"
+      });
+
+      pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "10mm",
+          right: "10mm",
+          bottom: "10mm",
+          left: "10mm"
+        }
+      });
+
+      await browser.close();
+      browser = null;
+    } catch (pdfErr) {
+      console.error("PDF generation failed, sending email without PDF:", pdfErr);
+
+      if (browser) {
+        await browser.close().catch(() => { });
+        browser = null;
       }
-    });
+    }
 
-    await browser.close();
-
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to,
       subject: `FedWELL Health Check Report - ${sessionId}`,
-
-      // This keeps the printed report visible directly in the email body
       html: `
         <div style="font-family: Arial, Helvetica, sans-serif; color:#111827;">
           <p>Hello ${patientName},</p>
-          <p>Please find your FedWELL health check report below. A PDF copy is also attached for saving or printing.</p>
-
+          <p>Please find your FedWELL health check report below.</p>
+          ${pdfBuffer ? "<p>A PDF copy is also attached for saving or printing.</p>" : ""}
           <div style="margin-top:18px;">
             ${reportHtml}
           </div>
         </div>
-      `,
+      `
+    };
 
-      // This attaches the same report as PDF
-      attachments: [
+    if (pdfBuffer) {
+      mailOptions.attachments = [
         {
           filename: `FedWELL-Health-Check-${sessionId}.pdf`,
           content: pdfBuffer,
           contentType: "application/pdf"
         }
-      ]
-    });
+      ];
+    }
+
+    await transporter.sendMail(mailOptions);
 
     return res.json({
-      message: "Report emailed successfully with PDF attachment."
+      message: pdfBuffer
+        ? "Report emailed successfully with PDF attachment."
+        : "Report emailed successfully, but PDF attachment could not be generated."
     });
   } catch (err) {
     if (browser) {
