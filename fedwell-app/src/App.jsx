@@ -1,4 +1,3 @@
-import html2pdf from "html2pdf.js";
 import React, { useState, useEffect, useRef } from "react";
 import {
   BarChart,
@@ -1734,6 +1733,10 @@ export default function App() {
     }
 
     try {
+      // Lazy-load html2pdf only when needed.
+      // Do NOT import html2pdf at the top of App.jsx.
+      const html2pdf = (await import("html2pdf.js")).default;
+
       const reportElement = document.getElementById("email-print-report");
 
       if (!reportElement) {
