@@ -13,14 +13,19 @@ const PORT = process.env.PORT || 3001;
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://itech3208-project-1-fedwell-dev-fed.vercel.app",
-    "https://itech3208-project-1-fedwell-dev-fed-flame.vercel.app"
-  ];
+  const isAllowedOrigin = origin => {
+    if (!origin) return true;
 
-  if (!origin || allowedOrigins.includes(origin)) {
+    return (
+      origin === "http://localhost:5173" ||
+      origin === "http://localhost:3000" ||
+      origin === "https://itech3208-project-1-fedwell-dev-fed.vercel.app" ||
+      origin === "https://itech3208-project-1-fedwell-dev-fed-flame.vercel.app" ||
+      origin.endsWith(".vercel.app")
+    );
+  };
+
+  if (isAllowedOrigin(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
 
