@@ -1408,7 +1408,14 @@ export default function App() {
 
         setToken(savedToken);
         setRole(savedRole);
-        setScreen(savedScreen || (savedRole === "teacher" ? "dashboard" : "clientdetails"));
+        const safeScreen =
+          savedRole === "teacher"
+            ? "dashboard"
+            : savedScreen === "dashboard"
+              ? "dashboard"
+              : "clientdetails";
+
+        setScreen(safeScreen);
 
         if (savedForm) {
           try {
@@ -1443,7 +1450,13 @@ export default function App() {
   useEffect(() => {
     if (role === "staff") {
       localStorage.setItem("fedwell_form_draft", JSON.stringify(form));
-      localStorage.setItem("fedwell_screen", screen);
+
+      const safeScreenToSave =
+        screen === "clientdetails" || screen === "dashboard"
+          ? screen
+          : "clientdetails";
+
+      localStorage.setItem("fedwell_screen", safeScreenToSave);
     }
   }, [form, screen, role]);
 
@@ -3189,5 +3202,35 @@ export default function App() {
     );
   }
 
-  return null;
+  return (
+    <div className="fw-page">
+      <Nav />
+      <div className="fw-content">
+        <div className="fw-card">
+          <h2 style={{ color: "var(--text)", marginBottom: 8 }}>
+            Session restored
+          </h2>
+
+          <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 14 }}>
+            This page could not be restored after refresh. Please start a new health check.
+          </p>
+
+          <button
+            onClick={startNew}
+            style={{
+              padding: "10px 18px",
+              borderRadius: 8,
+              background: FED_NAVY,
+              color: "white",
+              border: "none",
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            Start New Health Check
+          </button>
+        </div>
+      </div>
+    </div>
+  );;
 }
