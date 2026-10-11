@@ -14,10 +14,14 @@ const transporter = nodemailer.createTransport({
 });
 
 router.post("/send-report", async (req, res) => {
-  let browser;
-
   try {
-    const { to, patientName, sessionId, reportHtml } = req.body;
+    const {
+      to,
+      patientName,
+      sessionId,
+      reportHtml,
+      pdfBase64
+    } = req.body;
 
     if (!to || !patientName || !sessionId || !reportHtml) {
       return res.status(400).json({
@@ -25,69 +29,15 @@ router.post("/send-report", async (req, res) => {
       });
     }
 
-    const puppeteer = require("puppeteer-core");
-    const chromium = require("@sparticuz/chromium");
+    const attachments = [];
 
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless
-    });
-
-    const page = await browser.newPage();
-
-    const fullHtml = `
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>FedWELL Report ${sessionId}</title>
-          <style>
-            body {
-              margin: 0;
-              background: #ffffff;
-              font-family: Arial, Helvetica, sans-serif;
-            }
-
-            table {
-              page-break-inside: auto;
-            }
-
-            tr {
-              page-break-inside: avoid;
-              page-break-after: auto;
-            }
-
-            a {
-              color: #0052cc;
-            }
-          </style>
-        </head>
-        <body>
-          ${reportHtml}
-        </body>
-      </html>
-    `;
-
-    await page.setContent(fullHtml, {
-      waitUntil: "networkidle0",
-      timeout: 20000
-    });
-
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "10mm",
-        right: "10mm",
-        bottom: "10mm",
-        left: "10mm"
-      }
-    });
-
-    await browser.close();
-    browser = null;
+    if (pdfBase64) {
+      attachments.push({
+        filename: `FedWELL-Health-Check-${sessionId}.pdf`,
+        content: Buffer.from(pdfBase64, "base64"),
+        contentType: "application/pdf"
+      });
+    }
 
     await transporter.sendMail({
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
@@ -103,23 +53,15 @@ router.post("/send-report", async (req, res) => {
           </div>
         </div>
       `,
-      attachments: [
-        {
-          filename: `FedWELL-Health-Check-${sessionId}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf"
-        }
-      ]
+      attachments
     });
 
     return res.json({
-      message: "Report emailed successfully with PDF attachment."
+      message: pdfBase64
+        ? "Report emailed successfully with PDF attachment."
+        : "Report emailed successfully without PDF attachment."
     });
   } catch (err) {
-    if (browser) {
-      await browser.close().catch(() => { });
-    }
-
     console.error("Email report error:", err);
 
     return res.status(500).json({

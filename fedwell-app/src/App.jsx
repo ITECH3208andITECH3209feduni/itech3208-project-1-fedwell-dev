@@ -1,3 +1,4 @@
+import html2pdf from "html2pdf.js";
 import React, { useState, useEffect, useRef } from "react";
 import {
   BarChart,
@@ -196,6 +197,21 @@ const buildStyles = () => `
 `;
 
 // ─── helper functions ───────────────────────────────────────────────────────────
+
+const blobToBase64 = blob => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const result = reader.result || "";
+      const base64 = String(result).split(",")[1];
+      resolve(base64);
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 const stopWheel = e => e.currentTarget.blur();
 
@@ -1727,6 +1743,30 @@ export default function App() {
 
       const reportHtml = reportElement.innerHTML;
 
+      const pdfBlob = await html2pdf()
+        .set({
+          margin: 8,
+          filename: `FedWELL-Health-Check-${saved.rec.id}.pdf`,
+          image: {
+            type: "jpeg",
+            quality: 0.98
+          },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff"
+          },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait"
+          }
+        })
+        .from(reportElement)
+        .outputPdf("blob");
+
+      const pdfBase64 = await blobToBase64(pdfBlob);
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/email/send-report`, {
         method: "POST",
         headers: {
@@ -1737,7 +1777,8 @@ export default function App() {
           to: form.email,
           patientName: saved.patient.name,
           sessionId: saved.rec.id,
-          reportHtml
+          reportHtml,
+          pdfBase64
         })
       });
 
@@ -1747,7 +1788,7 @@ export default function App() {
         throw new Error(data.error || "Failed to send email.");
       }
 
-      alert("Printed report emailed successfully.");
+      alert("Report emailed successfully with PDF attachment.");
     } catch (err) {
       console.error("Email report error:", err);
       alert("Could not send email report. Check backend terminal.");
