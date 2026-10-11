@@ -1273,7 +1273,7 @@ function PrintReport({ saved }) {
           <div style={{ textAlign: "right", fontSize: 10, color: "#888" }}>
             <div>Session: {rec.id}</div>
             <div>Printed: {new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</div>
-            <div style={{ marginTop: 4, fontStyle: "italic" }}>Patient name not stored in database</div>
+            <div style={{ marginTop: 4, fontStyle: "italic" }}></div>
           </div>
         </div>
 
