@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FEDERATION UNIVERSITY AUSTRALIA — Official Brand Colours
+// FEDERATION UNIVERSITY AUSTRALIA   Official Brand Colours
 //   Navy  : #002060   Gold : #FFAB00   Dark gold : #E09600
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -697,7 +697,7 @@ function getFlag(k, v, g = "") {
   return n < r.lo ? "low" : n > r.hi ? "high" : "ok";
 }
 function hasFlag(rec) { return Object.keys(RANGES).some(k => getFlag(k, rec[k], rec.gender) !== "ok"); }
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "—"; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : " "; }
 function pct(n, t) { return t ? Math.round((n / t) * 100) : 0; }
 
 const AGE_GROUPS = [{ l: "Under 18", min: 0, max: 17 }, { l: "18–30", min: 18, max: 30 }, { l: "31–45", min: 31, max: 45 }, { l: "46–60", min: 46, max: 60 }, { l: "61+", min: 61, max: 999 }];
@@ -845,14 +845,14 @@ const normalRangeText = (key) => {
     resp: "12–20 /min",
     oxysat: "≥95 %",
     temp: "36.0–37.5 °C",
-    height: "—",
-    weight: "—",
+    height: " ",
+    weight: " ",
     waist: "Men: 94+ cm increased, 102+ cm greatly increased / Women: 80+ cm increased, 88+ cm greatly increased",
     bmi: "18.5–24.9 healthy weight",
     diab: "6–11 increased risk, 12+ high risk"
   };
 
-  return ranges[key] || "—";
+  return ranges[key] || " ";
 };
 
 const HealthLinks = ({ flagKey, status }) => {
@@ -933,14 +933,14 @@ function PrintReport({ saved }) {
       resp: "12–20 /min",
       oxysat: "≥95 %",
       temp: "36.0–37.5 °C",
-      height: "—",
-      weight: "—",
+      height: " ",
+      weight: " ",
       waist: "_",
       bmi: "18.5–24.9 healthy weight",
       diab: "0–5 lower risk, 6–11 increased risk, ≥12 high risk"
     };
 
-    return ranges[key] || "—";
+    return ranges[key] || " ";
   };
 
   const bloodPressureFlag =
@@ -956,7 +956,7 @@ function PrintReport({ saved }) {
     {
       key: "bp",
       label: "Blood Pressure",
-      value: `${rec.bpSys || "—"}/${rec.bpDia || "—"}`,
+      value: `${rec.bpSys || " "}/${rec.bpDia || " "}`,
       unit: "mmHg",
       flag: bloodPressureFlag
     },
@@ -1039,7 +1039,7 @@ function PrintReport({ saved }) {
             <FedUniLogo white={false} height={42} />
           </div>
 
-          <div style={{ fontSize: 12, color: "#555" }}>Nursing Gippsland — Community Health Program</div>
+          <div style={{ fontSize: 12, color: "#555" }}>Nursing Gippsland   Community Health Program</div>
           <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>federation.edu.au/nursing</div>
         </div>
 
@@ -1065,9 +1065,9 @@ function PrintReport({ saved }) {
             <tbody>
               {[
                 ["Patient Name", patient.name, "Age", patient.age + " yrs"],
-                ["Gender", patient.gender, "Home Postcode", rec.postcode || "—"],
-                ["Seen GP (12 mo.)", patient.gp || "—", "Check Location", rec.loc || "—"],
-                ["Student Nurse", rec.sn || "—", "Supervisor / RN", rec.rn || "—"],
+                ["Gender", patient.gender, "Home Postcode", rec.postcode || " "],
+                ["Seen GP (12 mo.)", patient.gp || " ", "Check Location", rec.loc || " "],
+                ["Student Nurse", rec.sn || " ", "Supervisor / RN", rec.rn || " "],
               ].map(([l1, v1, l2, v2], i) => (
                 <tr key={i} style={{ background: i % 2 ? "#F8FAFC" : "#fff" }}>
                   <td style={{ padding: "6px 10px", color: "#666", width: "20%", fontSize: 11 }}>{l1}</td>
@@ -1218,7 +1218,7 @@ function PrintReport({ saved }) {
           {[
             "Eat a balanced diet rich in fruits, vegetables and whole grains",
             "Aim for at least 30 minutes of moderate activity most days",
-            "If you smoke, seek support to quit — call Quitline 13 7848",
+            "If you smoke, seek support to quit   call Quitline 13 7848",
             "Limit alcohol to recommended guidelines",
             "Get 7–9 hours of quality sleep each night",
             "Take medications as prescribed by your doctor"
@@ -1249,7 +1249,7 @@ function PrintReport({ saved }) {
       <div style={{ borderTop: `2px solid ${FED_NAVY}`, paddingTop: 12, marginTop: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 10, color: "#888" }}>
-            <div><strong style={{ color: FED_NAVY }}>Federation University Australia</strong> — Nursing Gippsland</div>
+            <div><strong style={{ color: FED_NAVY }}>Federation University Australia</strong>   Nursing Gippsland</div>
             <div>CRICOS: 00103D · TEQSA ID: PRV12151 · RTO: 4909</div>
             <div>federation.edu.au · This report was generated by the FedWELL Health Check Platform</div>
           </div>
@@ -2135,7 +2135,7 @@ export default function App() {
     <div>
       <div className="no-print" style={{ background: FED_NAVY, color: "white", padding: "12px 20px", display: "flex", gap: 12, alignItems: "center" }}>
         <button onClick={() => setSP(false)} style={{ padding: "6px 14px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.3)", background: "transparent", color: "white", cursor: "pointer", fontSize: 13 }}>← Back</button>
-        <span style={{ fontSize: 14, fontWeight: 600 }}>Patient Health Report — {saved.rec.id}</span>
+        <span style={{ fontSize: 14, fontWeight: 600 }}>Patient Health Report   {saved.rec.id}</span>
         <button onClick={() => window.print()} style={{ padding: "6px 18px", borderRadius: 7, border: "none", background: FED_GOLD, color: brandText, fontWeight: 700, cursor: "pointer", fontSize: 13, marginLeft: "auto" }}>🖨 Print / Save PDF</button>
       </div>
       <PrintReport saved={saved} />
@@ -2155,7 +2155,7 @@ export default function App() {
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: FED_GOLD, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Step 1 of 3</div>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)" }}>Patient & Clinic Details</h2>
-            <p style={{ fontSize: 14, color: "var(--muted)", marginTop: 4 }}>Name appears on the printed report only — never stored in the database.</p>
+            <p style={{ fontSize: 14, color: "var(--muted)", marginTop: 4 }}>Name appears on the printed report only   never stored in the database.</p>
           </div>
 
           {formErr && (
@@ -2177,7 +2177,7 @@ export default function App() {
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 5, color: "var(--text)" }}>Full Name <span style={{ color: "#B91C1C" }}>*</span></label>
               <input className="fw-input" value={f.name || ""} onChange={e => setF("name", e.target.value)} placeholder="e.g. Jane Smith" />
-              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Used on printed/emailed report only — not stored in database</div>
+              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Used on printed/emailed report only   not stored in database</div>
             </div>
             <div style={{ marginBottom: 14 }}>
               <label style={{
@@ -2241,7 +2241,7 @@ export default function App() {
                 maxLength={4}
                 style={{ ...iStyle("ok", !!f.postcode) }}
               />
-              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Patient's home postcode — used to map future pop-up clinic locations</div>
+              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3 }}>Patient's home postcode   used to map future pop-up clinic locations</div>
             </div>
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 8, color: "var(--text)" }}>Gender <span style={{ color: "#B91C1C" }}>*</span></label>
@@ -2338,7 +2338,7 @@ export default function App() {
             </div>
           </SCard>
 
-          {/* temporary <PrivacyBanner dark={isDark}>Patient name &amp; home postcode stored separately. Name appears on report only — discarded after printing/emailing.</PrivacyBanner> */}
+          {/* temporary <PrivacyBanner dark={isDark}>Patient name &amp; home postcode stored separately. Name appears on report only   discarded after printing/emailing.</PrivacyBanner> */}
 
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
             <button onClick={proceed} style={{ padding: "11px 24px", borderRadius: 9, background: FED_NAVY, color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: `0 4px 12px rgba(0,32,96,0.3)` }}>
@@ -2361,12 +2361,12 @@ export default function App() {
         <div className="fw-content">
           {/* Patient banner */}
           <div style={{ background: isDark ? "rgba(0,32,96,0.3)" : "rgba(0,32,96,0.06)", border: `1px solid ${FED_NAVY}`, borderRadius: 10, padding: "10px 16px", marginBottom: 18, display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, color: "var(--text)" }}>
-            <span><strong>Patient:</strong> {f.name || "—"}</span>
-            <span><strong>Age:</strong> {f.age || "—"}</span>
-            <span><strong>Gender:</strong> {f.gender || "—"}</span>
-            <span><strong>Postcode:</strong> {f.postcode || "—"}</span>
-            <span><strong>Nurse:</strong> {f.sn || "—"}</span>
-            <span><strong>Supervisor:</strong> {f.rn || "—"}</span>
+            <span><strong>Patient:</strong> {f.name || " "}</span>
+            <span><strong>Age:</strong> {f.age || " "}</span>
+            <span><strong>Gender:</strong> {f.gender || " "}</span>
+            <span><strong>Postcode:</strong> {f.postcode || " "}</span>
+            <span><strong>Nurse:</strong> {f.sn || " "}</span>
+            <span><strong>Supervisor:</strong> {f.rn || " "}</span>
           </div>
           {/* Step + navigate */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
@@ -2458,14 +2458,14 @@ export default function App() {
     const f = form;
     const flags = {}; Object.keys(RANGES).forEach(k => { flags[k] = getFlag(k, f[k], f.gender || ""); });
     const rows = [
-      ["Blood Pressure", `${f.bpSys || "—"}/${f.bpDia || "—"}`, "mmHg", flags.bpSys === "ok" && flags.bpDia === "ok" ? "ok" : "high"],
+      ["Blood Pressure", `${f.bpSys || " "}/${f.bpDia || " "}`, "mmHg", flags.bpSys === "ok" && flags.bpDia === "ok" ? "ok" : "high"],
       ["Pulse", f.pulse, "bpm", flags.pulse], ["Resp Rate", f.resp, "/min", flags.resp],
       ["Oxygen Sat", f.oxysat, "%", flags.oxysat], ["Temp", f.temp, "°C", flags.temp],
       ["Height", f.height, "cm", "ok"],
       ["Weight", f.weight, "kg", "ok"],
       ["Waist", f.waist, "cm", flags.waist],
       ["BMI", f.bmi, "kg/m²", flags.bmi], ["Diabetes Risk", f.diab, "pts", flags.diab],
-    ].filter(r => r[1] && r[1] !== "—/—");
+    ].filter(r => r[1] && r[1] !== " / ");
     const fc = Object.values(flags).filter(v => v !== "ok").length;
     return (
       <div className="fw-page">
@@ -2480,26 +2480,26 @@ export default function App() {
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Patient Summary</div>
             <div style={{ background: "var(--surface2)", borderRadius: 8, padding: 14, marginBottom: 16 }}>
               <div className="fw-grid2" style={{ fontSize: 13, gap: 8 }}>
-                {[["Patient", f.name || "—"], ["Age", f.age || "—"], ["Gender", f.gender || "—"], ["GP Visit", f.seenGP || "—"], ["Home Postcode", f.postcode || "—"], ["Date", fmtDate(f.checkDate)], ["Event Location", f.loc || "—"], ["Student", f.sn || "—"], ["Supervisor/RN", f.rn || "—"]].map(([l, v]) => (
+                {[["Patient", f.name || " "], ["Age", f.age || " "], ["Gender", f.gender || " "], ["GP Visit", f.seenGP || " "], ["Home Postcode", f.postcode || " "], ["Date", fmtDate(f.checkDate)], ["Event Location", f.loc || " "], ["Student", f.sn || " "], ["Supervisor/RN", f.rn || " "]].map(([l, v]) => (
                   <span key={l} style={{ color: "var(--text)" }}><strong style={{ color: "var(--muted)", fontWeight: 600 }}>{l}:</strong> {v}</span>
                 ))}
               </div>
             </div>
             <div className="fw-review-grid">
               {rows.map(([label, value, unit, flag]) => (
-                <div key={label} style={{ background: flag !== "ok" ? "#FEF2F2" : value && value !== "—" ? "#F0FDF4" : "var(--surface2)", borderRadius: 8, padding: "10px 14px", border: `1px solid ${flag !== "ok" ? "#B91C1C" : value && value !== "—" ? "#15803D" : "var(--border)"}` }}>
+                <div key={label} style={{ background: flag !== "ok" ? "#FEF2F2" : value && value !== " " ? "#F0FDF4" : "var(--surface2)", borderRadius: 8, padding: "10px 14px", border: `1px solid ${flag !== "ok" ? "#B91C1C" : value && value !== " " ? "#15803D" : "var(--border)"}` }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: flag !== "ok" ? "#B91C1C" : "var(--muted)", marginBottom: 2 }}>{label}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: flag !== "ok" ? "#B91C1C" : "var(--text)" }}>{value} <span style={{ fontSize: 11, fontWeight: 400, color: "var(--muted)" }}>{unit}</span></div>
                   {flag !== "ok" && <div style={{ fontSize: 10, color: "#B91C1C", marginTop: 2 }}>Needs review</div>}
-                  {flag === "ok" && value && value !== "—" && <div style={{ fontSize: 10, color: "#15803D", marginTop: 2 }}>✓ In range</div>}
+                  {flag === "ok" && value && value !== " " && <div style={{ fontSize: 10, color: "#15803D", marginTop: 2 }}>✓ In range</div>}
                 </div>
               ))}
             </div>
             {fc > 0 && <div style={{ background: isDark ? "#2D0A0A" : "#FEF2F2", border: "1px solid #B91C1C", borderRadius: 8, padding: 12, marginTop: 14, fontSize: 13, color: "#B91C1C" }}>
-              ⚠ {fc} out-of-range reading{fc > 1 ? "s" : ""} — Australian health links will be included on the report.
+              ⚠ {fc} out-of-range reading{fc > 1 ? "s" : ""}   Australian health links will be included on the report.
             </div>}
             <div style={{ background: isDark ? "#1A1500" : "#FFFBEB", border: "1px solid #F59E0B", borderRadius: 8, padding: 12, marginTop: 10, fontSize: 12, color: isDark ? "#FCD34D" : "#92400E" }}>
-              Patient name appears on the printed/emailed report only — <strong>NOT</strong> stored in the database.
+              Patient name appears on the printed/emailed report only   <strong>NOT</strong> stored in the database.
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -2651,7 +2651,7 @@ export default function App() {
       return true;
     });
     const total = recs.length;
-    const avg = k => total ? (recs.reduce((s, r) => s + (parseFloat(r[k]) || 0), 0) / total).toFixed(1) : "—";
+    const avg = k => total ? (recs.reduce((s, r) => s + (parseFloat(r[k]) || 0), 0) / total).toFixed(1) : " ";
     const fc = k => recs.filter(r => getFlag(k, r[k], r.gender) !== "ok").length;
 
     const riskChartData = [
@@ -2698,11 +2698,11 @@ export default function App() {
       const ageDist = {}; AGE_GROUPS.forEach(g => { ageDist[g.l] = pr.filter(r => ageGroup(r.age) === g.l).length; });
       return {
         postcode: pc, count: pr.length, flagged: pr.filter(r => hasFlag(r)).length,
-        avgBP: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.bpSys) || 0), 0) / pr.length).toFixed(0) : "—",
-        avgBMI: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.bmi) || 0), 0) / pr.length).toFixed(1) : "—",
-        avgAge: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.age) || 0), 0) / pr.length).toFixed(0) : "—",
+        avgBP: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.bpSys) || 0), 0) / pr.length).toFixed(0) : " ",
+        avgBMI: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.bmi) || 0), 0) / pr.length).toFixed(1) : " ",
+        avgAge: pr.length ? (pr.reduce((s, r) => s + (parseFloat(r.age) || 0), 0) / pr.length).toFixed(0) : " ",
         ageDist,
-        topIssue: Object.entries(Object.keys(RANGES).reduce((acc, k) => { acc[RANGES[k].l] = (acc[RANGES[k].l] || 0) + pr.filter(r => getFlag(k, r[k], r.gender) !== "ok").length; return acc; }, {})).sort((a, b) => b[1] - a[1]).filter(([, n]) => n > 0)[0]?.[0] || "—",
+        topIssue: Object.entries(Object.keys(RANGES).reduce((acc, k) => { acc[RANGES[k].l] = (acc[RANGES[k].l] || 0) + pr.filter(r => getFlag(k, r[k], r.gender) !== "ok").length; return acc; }, {})).sort((a, b) => b[1] - a[1]).filter(([, n]) => n > 0)[0]?.[0] || " ",
       };
     });
 
@@ -2769,7 +2769,7 @@ export default function App() {
           {/* Filters */}
           <div className="fw-card" style={{ marginBottom: 18 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Filter Records</div>
-            {/* Date mode buttons — from the screenshot */}
+            {/* Date mode buttons   from the screenshot */}
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "flex-end" }}>
               {[
                 ["year", "Year", allYears],
@@ -2940,7 +2940,7 @@ export default function App() {
             <div>
               <div className="fw-card" style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Patient Home Postcode Analysis</div>
-                <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>Each postcode = patients' home area — used to identify future pop-up clinic locations. Age group distribution helps identify demographics per area.</p>
+                <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 16 }}>Each postcode = patients' home area   used to identify future pop-up clinic locations. Age group distribution helps identify demographics per area.</p>
                 {pcData.map(pc => (
                   <div key={pc.postcode} style={{ border: "1px solid var(--border)", borderRadius: 12, marginBottom: 14, overflow: "hidden" }}>
                     <div style={{ background: `linear-gradient(135deg,${FED_NAVY},#003476)`, padding: "12px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
@@ -3026,12 +3026,12 @@ export default function App() {
                           <td style={{ padding: "7px 10px", whiteSpace: "nowrap", color: "var(--text)" }}>{fmtDate(r.d)}</td>
                           <td style={{ padding: "7px 10px", color: "var(--text)" }}>{r.age}</td>
                           <td style={{ padding: "7px 10px", color: "var(--text)" }}>{r.gender}</td>
-                          <td style={{ padding: "7px 10px", fontWeight: 700, color: "#6D28D9" }}>{r.postcode || "—"}</td>
+                          <td style={{ padding: "7px 10px", fontWeight: 700, color: "#6D28D9" }}>{r.postcode || " "}</td>
                           <td style={{ padding: "7px 10px", color: "var(--text)" }}>{r.gp}</td>
                           <td style={{ padding: "7px 10px", whiteSpace: "nowrap", color: "var(--text)" }}>{r.loc}</td>
                           {["bpSys", "bpDia", "pulse", "oxysat", "temp", "waist", "bmi", "diab"].map(k => {
                             const fl = getFlag(k, r[k], r.gender);
-                            return <td key={k} style={{ padding: "7px 10px", fontWeight: fl !== "ok" ? 700 : 400, color: fl !== "ok" ? "#B91C1C" : fl === "ok" && r[k] ? "#15803D" : "var(--muted)" }}>{r[k] || "—"}</td>;
+                            return <td key={k} style={{ padding: "7px 10px", fontWeight: fl !== "ok" ? 700 : 400, color: fl !== "ok" ? "#B91C1C" : fl === "ok" && r[k] ? "#15803D" : "var(--muted)" }}>{r[k] || " "}</td>;
                           })}
                           <td style={{ padding: "7px 10px" }}>
                             <span style={{ background: hf ? (isDark ? "#2D0A0A" : "#FEF2F2") : (isDark ? "#0D2F1A" : "#F0FDF4"), color: hf ? "#B91C1C" : "#15803D", fontWeight: 700, fontSize: 10, padding: "3px 8px", borderRadius: 999, whiteSpace: "nowrap" }}>
