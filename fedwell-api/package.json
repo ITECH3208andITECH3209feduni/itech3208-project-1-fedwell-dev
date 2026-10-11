@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@sparticuz/chromium": "^153.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -19,7 +20,7 @@
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^9.0.5",
     "pg": "^8.20.0",
-    "puppeteer": "^25.13.0"
+    "puppeteer-core": "^25.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

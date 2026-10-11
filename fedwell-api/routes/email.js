@@ -1,6 +1,7 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 const router = express.Router();
 
@@ -26,9 +27,15 @@ router.post("/send-report", async (req, res) => {
       });
     }
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      args: isProduction ? chromium.args : [],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isProduction
+        ? await chromium.executablePath()
+        : undefined,
+      headless: chromium.headless
     });
 
     const page = await browser.newPage();
