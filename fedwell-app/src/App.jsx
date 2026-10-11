@@ -1356,6 +1356,7 @@ export default function App() {
   const [showPrint, setSP] = useState(false);
   const [formErr, setFormErr] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [emailConfirm, setEmailConfirm] = useState(false);
 
   const clearSession = () => {
     localStorage.removeItem("fedwell_token");
@@ -1898,6 +1899,7 @@ export default function App() {
       }
 
       alert("Report emailed successfully with PDF attachment.");
+      setEmailConfirm(false);
     } catch (err) {
       console.error("Email report error:", err);
       alert("Could not send email report. Check backend terminal.");
@@ -2735,10 +2737,75 @@ export default function App() {
                   style={{ width: "100%", padding: 11, borderRadius: 9, background: FED_NAVY, color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", marginBottom: 10 }}>
                   🖨 Preview &amp; Print Report
                 </button>
-                <button onClick={sendEmailReport}
-                  style={{ width: "100%", padding: 11, borderRadius: 9, background: "#0B7A65", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                <button
+                  onClick={() => setEmailConfirm(true)}
+                  style={{ width: "100%", padding: 11, borderRadius: 9, background: "#0B7A65", color: "white", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+                >
                   Email Report to Patient
                 </button>
+                {emailConfirm && (
+                  <div style={{
+                    marginTop: 12,
+                    padding: 12,
+                    borderRadius: 10,
+                    border: "1px solid var(--border)",
+                    background: "var(--surface2)"
+                  }}>
+                    <div style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "var(--text)",
+                      marginBottom: 6
+                    }}>
+                      Confirm patient email
+                    </div>
+
+                    <input
+                      className="fw-input"
+                      type="email"
+                      value={form.email || ""}
+                      onChange={e => setF("email", e.target.value)}
+                      placeholder="patient@example.com"
+                      style={{ marginBottom: 10 }}
+                    />
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        onClick={sendEmailReport}
+                        style={{
+                          flex: 1,
+                          padding: "9px 12px",
+                          borderRadius: 8,
+                          background: "#0B7A65",
+                          color: "white",
+                          border: "none",
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: "pointer"
+                        }}
+                      >
+                        Confirm & Send
+                      </button>
+
+                      <button
+                        onClick={() => setEmailConfirm(false)}
+                        style={{
+                          flex: 1,
+                          padding: "9px 12px",
+                          borderRadius: 8,
+                          background: "var(--surface)",
+                          color: "var(--muted)",
+                          border: "1px solid var(--border)",
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: "pointer"
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div style={{
                   position: "absolute",
                   left: "-99999px",
