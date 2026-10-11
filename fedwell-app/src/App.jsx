@@ -1355,6 +1355,7 @@ export default function App() {
   const [genderOther, setGO] = useState(false);
   const [showPrint, setSP] = useState(false);
   const [formErr, setFormErr] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const clearSession = () => {
     localStorage.removeItem("fedwell_token");
@@ -1376,36 +1377,67 @@ export default function App() {
 
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("fedwell_token");
-    const savedRole = localStorage.getItem("fedwell_role");
-    const savedScreen = localStorage.getItem("fedwell_screen");
-    const savedForm = localStorage.getItem("fedwell_form_draft");
+    const restoreSession = async () => {
+      const savedToken = localStorage.getItem("fedwell_token");
+      const savedRole = localStorage.getItem("fedwell_role");
+      const savedScreen = localStorage.getItem("fedwell_screen");
+      const savedForm = localStorage.getItem("fedwell_form_draft");
 
-    if (savedToken && savedRole) {
-      setToken(savedToken);
-      setRole(savedRole);
-      setScreen(savedScreen || (savedRole === "teacher" ? "dashboard" : "clientdetails"));
-
-      if (savedForm) {
-        try {
-          const draft = JSON.parse(savedForm);
-          const today = new Date().toISOString().split("T")[0];
-
-          setForm({
-            ...draft,
-            checkDate: !draft.checkDate || draft.checkDate < "2025-01-01"
-              ? today
-              : draft.checkDate,
-            loc: draft.loc || localStorage.getItem("fedwell_event_location") || ""
-          });
-        } catch {
-          setForm({
-            checkDate: new Date().toISOString().split("T")[0],
-            loc: localStorage.getItem("fedwell_event_location") || ""
-          });
-        }
+      if (!savedToken || !savedRole) {
+        clearSession();
+        setCheckingSession(false);
+        return;
       }
-    }
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/records`, {
+          headers: {
+            Authorization: `Bearer ${savedToken}`
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          clearSession();
+          setCheckingSession(false);
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Session check failed. Status: ${res.status}`);
+        }
+
+        setToken(savedToken);
+        setRole(savedRole);
+        setScreen(savedScreen || (savedRole === "teacher" ? "dashboard" : "clientdetails"));
+
+        if (savedForm) {
+          try {
+            const draft = JSON.parse(savedForm);
+            const today = new Date().toISOString().split("T")[0];
+
+            setForm({
+              ...draft,
+              checkDate: !draft.checkDate || draft.checkDate < "2025-01-01"
+                ? today
+                : draft.checkDate,
+              loc: draft.loc || localStorage.getItem("fedwell_event_location") || ""
+            });
+          } catch {
+            setForm({
+              checkDate: new Date().toISOString().split("T")[0],
+              loc: localStorage.getItem("fedwell_event_location") || ""
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Saved session check failed:", err);
+        clearSession();
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+
+    restoreSession();
   }, []);
 
   useEffect(() => {
@@ -1942,17 +1974,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
   const logout = () => {
-    localStorage.removeItem("fedwell_token");
-    localStorage.removeItem("fedwell_role");
-    localStorage.removeItem("fedwell_screen");
-    localStorage.removeItem("fedwell_form_draft");
-
-    setRole(null);
-    setScreen("login");
-    setPw("");
-    setPwEmail("");
-    setToken("");
-    setRecords([]);
+    clearSession();
   };
 
   // ── Theme Toggle Button ─────────────────────────────────────────────────────
@@ -1964,6 +1986,21 @@ export default function App() {
   );
 
   // ── LOGIN PAGE ──────────────────────────────────────────────────────────────
+  if (checkingSession) {
+    return (
+      <div className="fw-page" style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: isDark ? "#0F172A" : "#F1F5F9",
+        color: isDark ? "#FFFFFF" : FED_NAVY,
+        fontWeight: 700
+      }}>
+        Checking session...
+      </div>
+    );
+  }
   if (!role) return (
     <div className="fw-page" style={{
       minHeight: "100vh",
