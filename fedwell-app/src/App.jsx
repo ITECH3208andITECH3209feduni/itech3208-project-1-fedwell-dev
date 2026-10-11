@@ -197,6 +197,21 @@ const buildStyles = () => `
 
 // ─── helper functions ───────────────────────────────────────────────────────────
 
+const handleAuthExpired = () => {
+  localStorage.removeItem("fedwell_token");
+  localStorage.removeItem("fedwell_role");
+  localStorage.removeItem("fedwell_screen");
+  localStorage.removeItem("fedwell_form_draft");
+
+  setToken("");
+  setRole(null);
+  setScreen("login");
+  setRecords([]);
+  setSaved(null);
+
+  alert("Your session has expired. Please sign in again.");
+};
+
 const blobToBase64 = blob => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1410,15 +1425,33 @@ export default function App() {
   }, [theme]);
 
   // Load saved health-check records from Neon after login
+  // Load saved health-check records from Neon after login
   useEffect(() => {
     if (!token) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/records`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) return;
+    const loadRecords = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/records`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          handleAuthExpired();
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Failed to load records. Status: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          setRecords([]);
+          return;
+        }
 
         const mapped = data.map(r => ({
           id: r.session_id,
@@ -1451,9 +1484,17 @@ export default function App() {
           const n = parseInt(String(r.id || "").replace("FW-", ""), 10);
           return Number.isFinite(n) ? Math.max(max, n) : max;
         }, 0);
-        if (maxNum >= nextId) setNextId(maxNum + 1);
-      })
-      .catch(err => console.error("Failed to load records:", err));
+
+        if (maxNum >= nextId) {
+          setNextId(maxNum + 1);
+        }
+      } catch (err) {
+        console.error("Failed to load records:", err);
+        setRecords([]);
+      }
+    };
+
+    loadRecords();
   }, [token]);
 
   const toggleTheme = () => setTheme(t => t === "light" ? "dark" : "light");
