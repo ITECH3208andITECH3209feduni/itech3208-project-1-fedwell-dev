@@ -1269,7 +1269,18 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Signature lines */}
-      <div style={{ ...blockStyle, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 14 }}>
+      <div
+        className="pdf-avoid-break"
+        style={{
+          ...blockStyle,
+          pageBreakBefore: "always",
+          breakBefore: "page",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 24,
+          marginBottom: 14
+        }}
+      >
         {[
           ["Student Nurse", rec.sn || "_______________"],
           ["Supervisor / Registered Nurse", rec.rn || "_______________"]
@@ -1286,7 +1297,15 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Footer */}
-      <div style={{ ...blockStyle, borderTop: `2px solid ${FED_NAVY}`, paddingTop: 10, marginTop: 6 }}>
+      <div
+        className="pdf-avoid-break"
+        style={{
+          ...blockStyle,
+          borderTop: `2px solid ${FED_NAVY}`,
+          paddingTop: 10,
+          marginTop: 6
+        }}
+      >
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 10, color: "#888" }}>
             <div><strong style={{ color: FED_NAVY }}>Federation University Australia</strong>   Nursing Gippsland</div>
