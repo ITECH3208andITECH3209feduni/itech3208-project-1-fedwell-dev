@@ -927,6 +927,20 @@ function LocationInput({ value, onChange, locations, onAddLocation }) {
 function PrintReport({ saved }) {
   const { patient, rec, flags } = saved;
 
+  const sectionStyle = {
+    border: "1px solid #ddd",
+    borderRadius: 8,
+    marginBottom: 16,
+    overflow: "hidden",
+    pageBreakInside: "avoid",
+    breakInside: "avoid"
+  };
+
+  const blockStyle = {
+    pageBreakInside: "avoid",
+    breakInside: "avoid"
+  };
+
   const flagColor = f =>
     f === "high" ? "#990000" :
       f === "low" ? "#996600" :
@@ -1042,7 +1056,17 @@ function PrintReport({ saved }) {
   ].filter(m => m.value !== null && m.value !== undefined && m.value !== "");
 
   return (
-    <div style={{ fontFamily: "'Inter',Arial,sans-serif", maxWidth: 700, margin: "0 auto", padding: 32, color: "#111", background: "#fff" }}>
+    <div
+      className="pdf-avoid-break"
+      style={{
+        fontFamily: "'Inter',Arial,sans-serif",
+        maxWidth: 700,
+        margin: "0 auto",
+        padding: 24,
+        color: "#111",
+        background: "#fff"
+      }}
+    >
       {/* Letterhead */}
       <div style={{ borderBottom: `3px solid ${FED_NAVY}`, paddingBottom: 16, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
         <div>
@@ -1074,7 +1098,7 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Patient details */}
-      <div style={{ border: `1px solid #ddd`, borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
+      <div style={sectionStyle}>
         <div style={{ background: FED_NAVY, color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>PATIENT INFORMATION</div>
         <div style={{ padding: 16 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
@@ -1098,7 +1122,7 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Readings */}
-      <div style={{ border: "1px solid #ddd", borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
+      <div style={sectionStyle}>
         <div style={{ background: FED_NAVY, color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>HEALTH CHECK READINGS</div>
 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
@@ -1170,7 +1194,7 @@ function PrintReport({ saved }) {
 
       {/* Readings requiring attention */}
       {flagged.length > 0 && (
-        <div style={{ border: `2px solid #990000`, borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
+        <div style={sectionStyle}>
           <div style={{ background: "#990000", color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>
             READINGS REQUIRING ATTENTION & HEALTH RESOURCES
           </div>
@@ -1227,7 +1251,7 @@ function PrintReport({ saved }) {
       )}
 
       {/* Healthy lifestyle tips */}
-      <div style={{ border: "1px solid #ddd", borderRadius: 8, marginBottom: 20, overflow: "hidden" }}>
+      <div style={sectionStyle}>
         <div style={{ background: "#003476", color: "white", padding: "8px 16px", fontSize: 12, fontWeight: 700 }}>GENERAL HEALTHY LIFESTYLE TIPS</div>
 
         <div style={{ padding: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
@@ -1245,7 +1269,7 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Signature lines */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}>
+      <div style={{ ...blockStyle, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 14 }}>
         {[
           ["Student Nurse", rec.sn || "_______________"],
           ["Supervisor / Registered Nurse", rec.rn || "_______________"]
@@ -1262,7 +1286,7 @@ function PrintReport({ saved }) {
       </div>
 
       {/* Footer */}
-      <div style={{ borderTop: `2px solid ${FED_NAVY}`, paddingTop: 12, marginTop: 8 }}>
+      <div style={{ ...blockStyle, borderTop: `2px solid ${FED_NAVY}`, paddingTop: 10, marginTop: 6 }}>
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 10, color: "#888" }}>
             <div><strong style={{ color: FED_NAVY }}>Federation University Australia</strong>   Nursing Gippsland</div>
@@ -1850,14 +1874,18 @@ export default function App() {
 
       const pdfBlob = await html2pdf()
         .set({
-          margin: 8,
+          margin: 6,
           filename: `FedWELL-Health-Check-${saved.rec.id}.pdf`,
+          pagebreak: {
+            mode: ["css", "legacy"],
+            avoid: [".pdf-avoid-break"]
+          },
           image: {
             type: "jpeg",
             quality: 0.98
           },
           html2canvas: {
-            scale: 2,
+            scale: 1.5,
             useCORS: true,
             backgroundColor: "#ffffff"
           },
